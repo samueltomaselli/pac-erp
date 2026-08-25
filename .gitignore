@@ -1,0 +1,19 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Backend (Laravel) — nested .gitignore in backend/ also covers this
+backend/vendor
+backend/.env
+backend/.phpunit.result.cache
+backend/storage/*.key
+backend/database/database.sqlite
+
+# Frontend (Vue/Vite) — nested .gitignore in frontend/ also covers this
+frontend/node_modules
+frontend/dist
+frontend/.env
+
+# Editors
+.vscode
+.idea
