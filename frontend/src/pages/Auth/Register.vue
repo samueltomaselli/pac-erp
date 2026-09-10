@@ -1,6 +1,8 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import AuthCard from '@/components/AuthCard.vue'
+import BaseButton from '@/components/BaseButton.vue'
 import { useAuthStore } from '@/stores/useAuthStore'
 
 const router = useRouter()
@@ -33,72 +35,44 @@ async function onSubmit() {
   }
 }
 </script>
-
 <template>
-  <div class="flex min-h-screen items-center justify-center bg-gray-50 px-4">
-    <div class="w-full max-w-sm rounded-lg bg-white p-8 shadow">
-      <h1 class="mb-6 text-2xl font-semibold text-gray-900">Criar conta</h1>
-
-      <form class="space-y-4" @submit.prevent="onSubmit">
-        <div>
-          <label class="mb-1 block text-sm font-medium text-gray-700" for="name">Nome</label>
-          <input
-            id="name"
-            v-model="name"
-            type="text"
-            required
-            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"
-          />
-        </div>
-
-        <div>
-          <label class="mb-1 block text-sm font-medium text-gray-700" for="email">E-mail</label>
-          <input
-            id="email"
-            v-model="email"
-            type="email"
-            required
-            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"
-          />
-        </div>
-
-        <div>
-          <label class="mb-1 block text-sm font-medium text-gray-700" for="password">Senha</label>
-          <input
-            id="password"
-            v-model="password"
-            type="password"
-            required
-            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"
-          />
-        </div>
-
-        <div>
-          <label class="mb-1 block text-sm font-medium text-gray-700" for="password_confirmation">Confirmar senha</label>
-          <input
-            id="password_confirmation"
-            v-model="passwordConfirmation"
-            type="password"
-            required
-            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"
-          />
-        </div>
-
-        <p v-if="error" class="text-sm text-red-600">{{ error }}</p>
-
-        <button
-          type="submit"
-          :disabled="submitting"
-          class="w-full rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50"
-        >
-          Cadastrar
-        </button>
-      </form>
-
-      <p class="mt-4 text-center text-sm text-gray-600">
-        Já tem uma conta?
-        <router-link class="font-medium text-indigo-600 hover:underline" :to="{ name: 'login' }">Entrar</router-link>
+  <AuthCard title="Criar conta" subtitle="Cadastro de acesso">
+    <form class="space-y-4" @submit.prevent="onSubmit">
+      <div>
+        <label class="field-label" for="name">Nome</label>
+        <input id="name" v-model="name" type="text" required class="field" />
+      </div>
+      <div>
+        <label class="field-label" for="email">E-mail</label>
+        <input id="email" v-model="email" type="email" required class="field" />
+      </div>
+      <div>
+        <label class="field-label" for="password">Senha</label>
+        <input id="password" v-model="password" type="password" required class="field" />
+      </div>
+      <div>
+        <label class="field-label" for="password_confirmation">Confirmar senha</label>
+        <input
+          id="password_confirmation"
+          v-model="passwordConfirmation"
+          type="password"
+          required
+          class="field"
+        />
+      </div>
+      <p
+        v-if="error"
+        class="rounded-md bg-red-100 px-3 py-2 text-xs text-red-600 ring-1 ring-red-200"
+      >
+        {{ error }}
       </p>
-    </div>
-  </div>
+      <BaseButton type="submit" :disabled="submitting" block>Cadastrar</BaseButton>
+    </form>
+    <template #footer>
+      Já tem uma conta?
+      <router-link class="font-medium text-theme-light-700 hover:underline" :to="{ name: 'login' }">
+        Entrar
+      </router-link>
+    </template>
+  </AuthCard>
 </template>

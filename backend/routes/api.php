@@ -1,7 +1,10 @@
 <?php
 
+use App\Http\Controllers\Admin\CustomerController;
+use App\Http\Controllers\Admin\TaskController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\Customer\ProfileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -23,8 +26,19 @@ Route::middleware('auth:sanctum')->group(function () {
 
 Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('/ping', fn () => response()->json(['ok' => true]));
+
+    Route::apiResource('customers', CustomerController::class)->withTrashed(['show']);
+    Route::post('customers/{customer}/restore', [CustomerController::class, 'restore'])
+        ->withTrashed()
+        ->name('customers.restore');
+
+    Route::apiResource('tasks', TaskController::class);
+    Route::post('tasks/{task}/complete', [TaskController::class, 'complete'])->name('tasks.complete');
+    Route::post('tasks/{task}/reopen', [TaskController::class, 'reopen'])->name('tasks.reopen');
 });
 
 Route::middleware(['auth:sanctum', 'role:customer'])->prefix('customer')->group(function () {
     Route::get('/ping', fn () => response()->json(['ok' => true]));
+
+    Route::get('/profile', [ProfileController::class, 'show'])->name('customer.profile');
 });

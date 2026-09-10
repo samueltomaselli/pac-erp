@@ -23,6 +23,36 @@ const routes = [
     meta: { role: 'admin' },
   },
   {
+    path: '/admin/clientes',
+    name: 'admin.customers.index',
+    component: () => import('@/pages/Admin/Customers/CustomersList.vue'),
+    meta: { role: 'admin' },
+  },
+  {
+    path: '/admin/clientes/novo',
+    name: 'admin.customers.create',
+    component: () => import('@/pages/Admin/Customers/CustomerForm.vue'),
+    meta: { role: 'admin' },
+  },
+  {
+    path: '/admin/clientes/:id',
+    name: 'admin.customers.show',
+    component: () => import('@/pages/Admin/Customers/CustomerDetail.vue'),
+    meta: { role: 'admin' },
+  },
+  {
+    path: '/admin/clientes/:id/editar',
+    name: 'admin.customers.edit',
+    component: () => import('@/pages/Admin/Customers/CustomerForm.vue'),
+    meta: { role: 'admin' },
+  },
+  {
+    path: '/admin/tarefas',
+    name: 'admin.tasks.index',
+    component: () => import('@/pages/Admin/Tasks/TasksList.vue'),
+    meta: { role: 'admin' },
+  },
+  {
     path: '/customer',
     name: 'customer.home',
     component: () => import('@/pages/CustomerHome.vue'),
