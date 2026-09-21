@@ -53,6 +53,42 @@ const routes = [
     meta: { role: 'admin' },
   },
   {
+    path: '/admin/propostas',
+    name: 'admin.proposals.index',
+    component: () => import('@/pages/Admin/Proposals/ProposalsList.vue'),
+    meta: { role: 'admin' },
+  },
+  {
+    path: '/admin/propostas/nova',
+    name: 'admin.proposals.create',
+    component: () => import('@/pages/Admin/Proposals/ProposalForm.vue'),
+    meta: { role: 'admin' },
+  },
+  {
+    path: '/admin/propostas/:id/editar',
+    name: 'admin.proposals.edit',
+    component: () => import('@/pages/Admin/Proposals/ProposalForm.vue'),
+    meta: { role: 'admin' },
+  },
+  {
+    path: '/admin/propostas/:id',
+    name: 'admin.proposals.show',
+    component: () => import('@/pages/Admin/Proposals/ProposalDetail.vue'),
+    meta: { role: 'admin' },
+  },
+  {
+    path: '/admin/propostas/catalogo',
+    name: 'admin.proposals.catalog',
+    component: () => import('@/pages/Admin/Proposals/CatalogList.vue'),
+    meta: { role: 'admin' },
+  },
+  {
+    path: '/admin/propostas/modelos',
+    name: 'admin.proposals.templates',
+    component: () => import('@/pages/Admin/Proposals/TemplatesList.vue'),
+    meta: { role: 'admin' },
+  },
+  {
     path: '/customer',
     name: 'customer.home',
     component: () => import('@/pages/CustomerHome.vue'),
