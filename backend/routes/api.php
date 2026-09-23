@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Admin\CustomerController;
+use App\Http\Controllers\Admin\ProposalController;
+use App\Http\Controllers\Admin\ProposalTemplateController;
 use App\Http\Controllers\Admin\TaskController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
@@ -35,6 +37,13 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(functi
     Route::apiResource('tasks', TaskController::class);
     Route::post('tasks/{task}/complete', [TaskController::class, 'complete'])->name('tasks.complete');
     Route::post('tasks/{task}/reopen', [TaskController::class, 'reopen'])->name('tasks.reopen');
+
+    Route::apiResource('proposals', ProposalController::class);
+    Route::post('proposals/{proposal}/send', [ProposalController::class, 'send'])->name('proposals.send');
+    Route::post('proposals/{proposal}/accept', [ProposalController::class, 'accept'])->name('proposals.accept');
+    Route::post('proposals/{proposal}/reject', [ProposalController::class, 'reject'])->name('proposals.reject');
+
+    Route::apiResource('proposal-templates', ProposalTemplateController::class);
 });
 
 Route::middleware(['auth:sanctum', 'role:customer'])->prefix('customer')->group(function () {
