@@ -47,8 +47,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(functi
 
     Route::apiResource('proposal-templates', ProposalTemplateController::class);
     Route::apiResource('proposals.items', ProposalItemController::class)
-        ->only(['store', 'update', 'destroy'])
-        ->scopeBindings();
+        ->only(['store', 'update', 'destroy']);
     Route::apiResource('proposal-catalog-items', ProposalCatalogItemController::class)
         ->parameters(['proposal-catalog-items' => 'catalogItem']);
 });

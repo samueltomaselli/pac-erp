@@ -70,6 +70,12 @@ class Customer extends Model
         return $this->hasMany(Task::class);
     }
 
+    /** @return HasMany<Proposal, $this> */
+    public function proposals(): HasMany
+    {
+        return $this->hasMany(Proposal::class);
+    }
+
     /**
      * @return HasMany<Task, $this>
      */

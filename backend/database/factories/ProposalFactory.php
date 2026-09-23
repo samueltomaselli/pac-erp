@@ -61,4 +61,9 @@ class ProposalFactory extends Factory
             ProposalItem::factory()->count($count)->for($proposal)->create();
         });
     }
+
+    public function withItems(int $count = 2): static
+    {
+        return $this->hasItems($count);
+    }
 }

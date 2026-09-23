@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Models\Proposal;
+use App\Support\ProposalTotals;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -20,8 +21,8 @@ class ProposalResource extends JsonResource
             'title' => $this->title,
             'issued_on' => $this->issued_on?->toDateString(),
             'valid_until' => $this->valid_until?->toDateString(),
-            'payment_method' => $this->payment_method,
-            'payment_method_label' => $this->payment_method,
+            'payment_method' => $this->payment_method?->value,
+            'payment_method_label' => $this->payment_method?->label(),
             'payment_notes' => $this->payment_notes,
             'observations' => $this->observations,
             'terms' => $this->terms,
@@ -32,17 +33,8 @@ class ProposalResource extends JsonResource
                 'status' => $status->value,
                 'label' => $status->label(),
             ], $this->status->allowedTransitions()),
-            'totals' => [
-                'total_cents' => 0,
-                'mrr_cents' => 0,
-                'onetime_cents' => 0,
-                'onetime_single_cents' => 0,
-                'installment_monthly_cents' => 0,
-                'max_installments' => 0,
-                'first_payment_cents' => 0,
-                'during_installments_cents' => 0,
-            ],
-            'items_count' => $this->items()->count(),
+            'totals' => ProposalTotals::summarize($this->items),
+            'items_count' => $this->whenCounted('items'),
             'sent_at' => $this->sent_at?->toIso8601String(),
             'decided_at' => $this->decided_at?->toIso8601String(),
             'created_at' => $this->created_at?->toIso8601String(),

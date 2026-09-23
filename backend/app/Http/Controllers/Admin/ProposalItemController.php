@@ -23,11 +23,15 @@ class ProposalItemController extends Controller
 
     public function update(UpdateProposalItemRequest $request, Proposal $proposal, ProposalItem $item, UpdateProposalItem $updateProposalItem): JsonResponse
     {
+        abort_unless($item->proposal_id === $proposal->id, 404);
+
         return $this->respond($updateProposalItem->handle($proposal, $item, $request->validated()));
     }
 
     public function destroy(Proposal $proposal, ProposalItem $item, RemoveProposalItem $removeProposalItem): JsonResponse
     {
+        abort_unless($item->proposal_id === $proposal->id, 404);
+
         return $this->respond($removeProposalItem->handle($proposal, $item));
     }
 

@@ -26,4 +26,19 @@ class ProposalItemFactory extends Factory
             'installments' => 1,
         ];
     }
+
+    public function recurring(): static
+    {
+        return $this->state(['type' => ProposalItemType::Recurring, 'installments' => 1]);
+    }
+
+    public function oneTime(): static
+    {
+        return $this->state(['type' => ProposalItemType::OneTime]);
+    }
+
+    public function installments(int $n): static
+    {
+        return $this->state(['type' => ProposalItemType::OneTime, 'installments' => $n]);
+    }
 }

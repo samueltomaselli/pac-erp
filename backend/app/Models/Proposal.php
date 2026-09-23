@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Enums\PaymentMethod;
 use App\Enums\ProposalStatus;
 use Database\Factories\ProposalFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -30,7 +32,6 @@ class Proposal extends Model
         'terms',
         'sent_at',
         'decided_at',
-        'pub_id',
     ];
 
     /**
@@ -43,6 +44,7 @@ class Proposal extends Model
             'valid_until' => 'date',
             'sent_at' => 'datetime',
             'decided_at' => 'datetime',
+            'payment_method' => PaymentMethod::class,
             'status' => ProposalStatus::class,
         ];
     }
@@ -51,6 +53,7 @@ class Proposal extends Model
     {
         static::creating(function (self $proposal): void {
             $proposal->pub_id ??= (string) Str::uuid();
+            $proposal->status ??= ProposalStatus::Draft;
         });
     }
 
@@ -80,5 +83,34 @@ class Proposal extends Model
     public function getIsEditableAttribute(): bool
     {
         return $this->status->isEditable();
+    }
+
+    /** @param Builder<Proposal> $query */
+    public function scopeStatus(Builder $query, ProposalStatus|string|null $status): void
+    {
+        if ($status === null || $status === '') {
+            return;
+        }
+
+        $query->where('status', $status instanceof ProposalStatus ? $status->value : $status);
+    }
+
+    /** @param Builder<Proposal> $query */
+    public function scopeSearch(Builder $query, ?string $term): void
+    {
+        $term = trim((string) $term);
+        if ($term === '') {
+            return;
+        }
+
+        $reference = preg_replace('/^#?pc-/i', '', $term);
+        $reference = preg_replace('/\D/', '', (string) $reference);
+
+        $query->where(function (Builder $query) use ($term, $reference): void {
+            $query->where('title', 'like', '%'.$term.'%');
+            if ($reference !== '') {
+                $query->orWhere('id', (int) $reference);
+            }
+        });
     }
 }
