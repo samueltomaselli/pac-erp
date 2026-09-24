@@ -3,9 +3,12 @@
 namespace Database\Seeders;
 
 use App\Enums\CustomerSegment;
+use App\Enums\ProposalStatus;
 use App\Enums\TaskPriority;
 use App\Enums\UserRole;
 use App\Models\Customer;
+use App\Models\Proposal;
+use App\Models\ProposalItem;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -63,6 +66,11 @@ class DatabaseSeeder extends Seeder
             'due_date' => today(),
             'priority' => TaskPriority::Low,
         ]);
+
+        $this->proposal($alvorada, $admin, ProposalStatus::Draft, 'Diagnóstico operacional');
+        $this->proposal($prata, $admin, ProposalStatus::Sent, 'Assessoria mensal de crédito');
+        $this->proposal($horizonte, $admin, ProposalStatus::Accepted, 'Implantação de processos');
+        $this->proposal($alvorada, $admin, ProposalStatus::Rejected, 'Revisão documental');
     }
 
     private function customer(string $name, string $document, string $email, CustomerSegment $segment, string $contact): Customer
@@ -81,5 +89,31 @@ class DatabaseSeeder extends Seeder
             'segment' => $segment,
             'contact_name' => $contact,
         ]);
+    }
+
+    private function proposal(Customer $customer, User $admin, ProposalStatus $status, string $title): Proposal
+    {
+        $proposal = Proposal::factory()->state([
+            'created_by' => $admin->id,
+            'status' => $status,
+            'title' => $title,
+            'issued_on' => today(),
+            'valid_until' => today()->addDays(30),
+        ])->when($status === ProposalStatus::Sent, fn ($factory) => $factory->sent())
+            ->when($status === ProposalStatus::Accepted, fn ($factory) => $factory->accepted())
+            ->when($status === ProposalStatus::Rejected, fn ($factory) => $factory->rejected())
+            ->for($customer)
+            ->create();
+
+        ProposalItem::factory()->for($proposal)->recurring()->create([
+            'description' => 'Acompanhamento mensal',
+            'unit_amount_cents' => 50000,
+        ]);
+        ProposalItem::factory()->for($proposal)->oneTime()->installments(3)->create([
+            'description' => 'Implantação inicial',
+            'unit_amount_cents' => 100000,
+        ]);
+
+        return $proposal;
     }
 }
