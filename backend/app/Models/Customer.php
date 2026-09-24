@@ -1,5 +1,5 @@
 <?php
-
+//Customer
 namespace App\Models;
 
 use App\Enums\CustomerSegment;
