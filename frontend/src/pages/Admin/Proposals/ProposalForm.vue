@@ -105,7 +105,10 @@ async function onSubmit() {
     const result = editing.value
       ? await updateProposal(id.value, payload())
       : await createProposal(payload());
-    router.push({ name: "admin.proposals.edit", params: { id: result.id } });
+    router.push({
+      name: editing.value ? "admin.proposals.show" : "admin.proposals.index",
+      ...(editing.value && { params: { id: result.id } }),
+    });
   } catch (e) {
     errors.value = e?.response?.data?.errors || {};
     message.value =

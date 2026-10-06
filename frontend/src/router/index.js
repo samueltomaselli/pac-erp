@@ -17,6 +17,11 @@ const routes = [
     component: () => import('@/pages/Auth/Register.vue'),
   },
   {
+    path: '/proposta/:pubId',
+    name: 'public.proposal',
+    component: () => import('@/pages/Public/ProposalView.vue'),
+  },
+  {
     path: '/admin',
     name: 'admin.home',
     component: () => import('@/pages/AdminHome.vue'),

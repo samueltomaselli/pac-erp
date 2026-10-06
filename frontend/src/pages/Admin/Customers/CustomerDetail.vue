@@ -5,7 +5,7 @@ import { ArrowLeft, Pencil } from '@lucide/vue'
 import AppLayout from '@/components/AppLayout.vue'
 import BadgeTag from '@/components/BadgeTag.vue'
 import BaseButton from '@/components/BaseButton.vue'
-import { formatDate, formatDateTime } from '@/constants/domain'
+import { formatCurrency, formatDate, formatDateTime } from '@/constants/domain'
 import { getCustomer } from '@/utils/api/customers'
 import { completeTask } from '@/utils/api/tasks'
 
@@ -72,6 +72,29 @@ onMounted(fetchCustomer)
       {{ error }}
     </p>
     <div v-else-if="customer" class="space-y-4">
+      <section v-if="customer.current_plan" class="panel p-6">
+        <div class="flex flex-wrap items-start justify-between gap-4">
+          <div class="min-w-0">
+            <p class="field-label">Plano atual</p>
+            <h2 class="font-display text-lg font-semibold text-gray-900">
+              {{ customer.current_plan.title }}
+            </h2>
+            <p class="mono mt-1 text-xs text-gray-500">
+              {{ customer.current_plan.reference }}
+            </p>
+          </div>
+          <div class="text-right">
+            <p class="field-label">Valor mensal</p>
+            <p class="text-lg font-semibold tabular-nums text-gray-900">
+              {{ formatCurrency(customer.current_plan.mrr_cents) }}
+            </p>
+          </div>
+        </div>
+        <p class="mt-3 text-xs text-gray-500">
+          Ativo desde {{ formatDateTime(customer.current_plan.accepted_at) }}
+        </p>
+      </section>
+      <p v-else class="px-1 text-sm text-gray-500">Sem plano ativo</p>
       <section class="panel p-6">
         <div class="mb-4 flex flex-wrap items-center gap-2">
           <h2 class="text-sm font-semibold text-gray-900">Dados cadastrais</h2>
@@ -158,9 +181,68 @@ onMounted(fetchCustomer)
           </li>
         </ul>
       </section>
-      <p class="text-xs text-gray-500">
-        Propostas e chamados deste cliente serão exibidos aqui nas próximas sprints.
-      </p>
+      <section class="panel overflow-hidden">
+        <div class="border-b border-gray-200 bg-gray-50 px-6 py-3">
+          <h2 class="text-sm font-semibold text-gray-900">
+            Propostas
+            <span class="ml-1 text-xs font-normal text-gray-500">
+              {{ customer.proposals_count }}
+            </span>
+          </h2>
+        </div>
+        <p
+          v-if="!customer.proposals?.length"
+          class="px-6 py-10 text-center text-sm text-gray-500"
+        >
+          Nenhuma proposta para este cliente
+        </p>
+        <div v-else class="overflow-x-auto">
+          <table class="min-w-full text-sm">
+            <thead class="bg-white text-left">
+              <tr class="border-b border-gray-200">
+                <th class="px-4 py-2.5 text-[11px] font-medium text-gray-500">Proposta</th>
+                <th class="whitespace-nowrap px-4 py-2.5 text-[11px] font-medium text-gray-500">
+                  Emissão
+                </th>
+                <th class="whitespace-nowrap px-4 py-2.5 text-[11px] font-medium text-gray-500">
+                  Validade
+                </th>
+                <th class="whitespace-nowrap px-4 py-2.5 text-[11px] font-medium text-gray-500">
+                  Situação
+                </th>
+                <th class="whitespace-nowrap px-4 py-2.5 text-right text-[11px] font-medium text-gray-500">
+                  Total
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr
+                v-for="proposal in customer.proposals"
+                :key="proposal.id"
+                class="cursor-pointer hover:bg-gray-50"
+                @click="$router.push({ name: 'admin.proposals.show', params: { id: proposal.id } })"
+              >
+                <td class="max-w-80 px-4 py-3">
+                  <span class="mono text-xs text-gray-500">{{ proposal.reference }}</span>
+                  <p class="truncate font-medium text-gray-900">{{ proposal.title }}</p>
+                </td>
+                <td class="whitespace-nowrap px-4 py-3 tabular-nums text-gray-700">
+                  {{ formatDate(proposal.issued_on) }}
+                </td>
+                <td class="whitespace-nowrap px-4 py-3 tabular-nums text-gray-700">
+                  {{ formatDate(proposal.valid_until) }}
+                </td>
+                <td class="whitespace-nowrap px-4 py-3">
+                  <BadgeTag :label="proposal.status_label" :tone="proposal.status" />
+                </td>
+                <td class="whitespace-nowrap px-4 py-3 text-right tabular-nums text-gray-700">
+                  {{ formatCurrency(proposal.totals.total_cents) }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
     </div>
   </AppLayout>
 </template>
