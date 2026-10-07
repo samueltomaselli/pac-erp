@@ -8,6 +8,7 @@ enum ProposalStatus: string
     case Sent = 'sent';
     case Accepted = 'accepted';
     case Rejected = 'rejected';
+    case Expired = 'expired';
 
     public function label(): string
     {
@@ -16,6 +17,7 @@ enum ProposalStatus: string
             self::Sent => 'Enviada',
             self::Accepted => 'Aceita',
             self::Rejected => 'Recusada',
+            self::Expired => 'Vencida',
         };
     }
 
@@ -31,8 +33,8 @@ enum ProposalStatus: string
     {
         return match ($this) {
             self::Draft => [self::Sent],
-            self::Sent => [self::Accepted, self::Rejected],
-            self::Accepted, self::Rejected => [],
+            self::Sent => [self::Accepted, self::Rejected, self::Expired],
+            self::Accepted, self::Rejected, self::Expired => [],
         };
     }
 
@@ -43,6 +45,6 @@ enum ProposalStatus: string
 
     public function isFinal(): bool
     {
-        return $this === self::Accepted || $this === self::Rejected;
+        return in_array($this, [self::Accepted, self::Rejected, self::Expired], true);
     }
 }

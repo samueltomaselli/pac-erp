@@ -24,6 +24,6 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withSchedule(function (Schedule $schedule): void {
-        //
+        $schedule->command('proposals:expire')->dailyAt('03:00');
     })
     ->create();

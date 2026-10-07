@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Enums\ProposalStatus;
 use App\Models\Proposal;
 use App\Support\ProposalTotals;
 use Illuminate\Http\Request;
@@ -29,10 +30,13 @@ class ProposalResource extends JsonResource
             'status' => $this->status->value,
             'status_label' => $this->status->label(),
             'is_editable' => $this->is_editable,
-            'allowed_transitions' => array_map(fn ($status) => [
+            'allowed_transitions' => array_values(array_map(fn ($status) => [
                 'status' => $status->value,
                 'label' => $status->label(),
-            ], $this->status->allowedTransitions()),
+            ], array_filter(
+                $this->status->allowedTransitions(),
+                fn (ProposalStatus $status) => $status !== ProposalStatus::Expired,
+            ))),
             'totals' => ProposalTotals::summarize($this->items),
             'items_count' => $this->whenCounted('items'),
             'sent_at' => $this->sent_at?->toIso8601String(),
