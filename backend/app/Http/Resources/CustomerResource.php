@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use App\Models\Customer;
+use App\Support\ProposalTotals;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -39,6 +40,14 @@ class CustomerResource extends JsonResource
             'tasks' => TaskResource::collection($this->whenLoaded('tasks')),
             'tasks_count' => $this->whenCounted('tasks'),
             'pending_tasks_count' => $this->whenCounted('pendingTasks'),
+            'proposals' => ProposalResource::collection($this->whenLoaded('proposals')),
+            'proposals_count' => $this->whenCounted('proposals'),
+            'current_plan' => $this->whenLoaded('currentPlan', fn () => $this->currentPlan ? [
+                'reference' => $this->currentPlan->reference,
+                'title' => $this->currentPlan->title,
+                'mrr_cents' => ProposalTotals::summarize($this->currentPlan->items)['mrr_cents'],
+                'accepted_at' => $this->currentPlan->decided_at?->toIso8601String(),
+            ] : null),
         ];
     }
 }

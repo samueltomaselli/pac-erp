@@ -5,7 +5,7 @@ import { ArrowLeft, Pencil } from '@lucide/vue'
 import AppLayout from '@/components/AppLayout.vue'
 import BadgeTag from '@/components/BadgeTag.vue'
 import BaseButton from '@/components/BaseButton.vue'
-import { formatDate, formatDateTime } from '@/constants/domain'
+import { formatCurrency, formatDate, formatDateTime } from '@/constants/domain'
 import { getCustomer } from '@/utils/api/customers'
 import { completeTask } from '@/utils/api/tasks'
 
@@ -38,7 +38,7 @@ onMounted(fetchCustomer)
 <template>
   <AppLayout
     :title="customer?.name ?? 'Cliente'"
-    subtitle="Dados cadastrais e tarefas vinculadas"
+    subtitle="Dados cadastrais, tarefas e propostas vinculadas"
   >
     <template #actions>
       <router-link
@@ -158,8 +158,90 @@ onMounted(fetchCustomer)
           </li>
         </ul>
       </section>
+      <section class="panel overflow-hidden">
+        <div class="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-6 py-3">
+          <h2 class="text-sm font-semibold text-gray-900">
+            Propostas
+            <span class="ml-1 text-xs font-normal text-gray-500">
+              {{ customer.proposals_count }} registrada(s)
+            </span>
+          </h2>
+        </div>
+        <p v-if="!customer.proposals?.length" class="px-6 py-10 text-center text-sm text-gray-500">
+          Nenhuma proposta vinculada a este cliente.
+        </p>
+        <ul v-else class="divide-y divide-gray-200">
+          <li v-for="proposal in customer.proposals" :key="proposal.id" class="space-y-3 px-6 py-4">
+            <div class="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p class="text-sm font-medium text-gray-900">
+                  {{ proposal.reference }} · {{ proposal.title }}
+                </p>
+                <p class="mt-0.5 text-xs text-gray-500">
+                  Emitida em {{ formatDate(proposal.issued_on) }}
+                  <span v-if="proposal.valid_until">
+                    · Válida até {{ formatDate(proposal.valid_until) }}
+                  </span>
+                </p>
+              </div>
+              <BadgeTag :label="proposal.status_label" :tone="proposal.status" />
+            </div>
+            <div class="grid gap-3 text-xs sm:grid-cols-3">
+              <div>
+                <p class="text-gray-500">Total</p>
+                <p class="mt-0.5 font-medium text-gray-900">
+                  {{ formatCurrency(proposal.totals.total_cents) }}
+                </p>
+              </div>
+              <div>
+                <p class="text-gray-500">Recorrente mensal</p>
+                <p class="mt-0.5 font-medium text-gray-900">
+                  {{ formatCurrency(proposal.totals.mrr_cents) }}
+                </p>
+              </div>
+              <div>
+                <p class="text-gray-500">Itens</p>
+                <p class="mt-0.5 font-medium text-gray-900">
+                  {{ proposal.items?.length ?? proposal.items_count ?? 0 }}
+                </p>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </section>
+      <section class="panel p-6">
+        <div class="mb-3 flex items-center justify-between gap-3">
+          <h2 class="text-sm font-semibold text-gray-900">Plano atual</h2>
+          <BadgeTag v-if="customer.current_plan" label="Ativo" tone="accepted" />
+        </div>
+        <div v-if="customer.current_plan" class="grid gap-4 sm:grid-cols-3">
+          <div>
+            <p class="text-[11px] font-medium text-gray-500">Proposta</p>
+            <p class="mt-1 text-sm text-gray-900">{{ customer.current_plan.reference }}</p>
+          </div>
+          <div>
+            <p class="text-[11px] font-medium text-gray-500">Título</p>
+            <p class="mt-1 text-sm text-gray-900">{{ customer.current_plan.title }}</p>
+          </div>
+          <div>
+            <p class="text-[11px] font-medium text-gray-500">Mensalidade recorrente</p>
+            <p class="mt-1 text-sm font-medium text-gray-900">
+              {{ formatCurrency(customer.current_plan.mrr_cents) }}
+            </p>
+          </div>
+          <div>
+            <p class="text-[11px] font-medium text-gray-500">Aceito em</p>
+            <p class="mt-1 text-sm text-gray-900">
+              {{ formatDateTime(customer.current_plan.accepted_at) }}
+            </p>
+          </div>
+        </div>
+        <p v-else class="text-sm text-gray-500">
+          Este cliente ainda não possui uma proposta aceita.
+        </p>
+      </section>
       <p class="text-xs text-gray-500">
-        Propostas e chamados deste cliente serão exibidos aqui nas próximas sprints.
+        Chamados deste cliente serão exibidos aqui nas próximas sprints.
       </p>
     </div>
   </AppLayout>
