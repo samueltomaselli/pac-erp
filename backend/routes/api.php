@@ -9,11 +9,19 @@ use App\Http\Controllers\Admin\TaskController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Customer\ProfileController;
+use App\Http\Controllers\PublicProposalController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [RegisteredUserController::class, 'store']);
 Route::post('/login', [AuthenticatedSessionController::class, 'store']);
+
+// Link público da proposta: sem autenticação, resolvido só pelo pub_id (UUID).
+// Não há rota de recusa pública: recusa é ação de admin.
+Route::middleware('throttle:60,1')->prefix('public')->group(function () {
+    Route::get('proposals/{proposal:pub_id}', [PublicProposalController::class, 'show'])->name('public.proposals.show');
+    Route::post('proposals/{proposal:pub_id}/accept', [PublicProposalController::class, 'accept'])->name('public.proposals.accept');
+});
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy']);
