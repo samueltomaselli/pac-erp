@@ -36,8 +36,7 @@ const routes = [
   {
     path: '/admin/clientes/novo',
     name: 'admin.customers.create',
-    component: () => import('@/pages/Admin/Customers/CustomerForm.vue'),
-    meta: { role: 'admin' },
+    redirect: { name: 'admin.customers.index', query: { novo: '1' } },
   },
   {
     path: '/admin/clientes/:id',
@@ -48,8 +47,11 @@ const routes = [
   {
     path: '/admin/clientes/:id/editar',
     name: 'admin.customers.edit',
-    component: () => import('@/pages/Admin/Customers/CustomerForm.vue'),
-    meta: { role: 'admin' },
+    redirect: (to) => ({
+      name: 'admin.customers.show',
+      params: { id: to.params.id },
+      query: { editar: '1' },
+    }),
   },
   {
     path: '/admin/tarefas',
@@ -70,18 +72,6 @@ const routes = [
     meta: { role: 'admin' },
   },
   {
-    path: '/admin/propostas/:id/editar',
-    name: 'admin.proposals.edit',
-    component: () => import('@/pages/Admin/Proposals/ProposalForm.vue'),
-    meta: { role: 'admin' },
-  },
-  {
-    path: '/admin/propostas/:id',
-    name: 'admin.proposals.show',
-    component: () => import('@/pages/Admin/Proposals/ProposalDetail.vue'),
-    meta: { role: 'admin' },
-  },
-  {
     path: '/admin/propostas/catalogo',
     name: 'admin.proposals.catalog',
     component: () => import('@/pages/Admin/Proposals/CatalogList.vue'),
@@ -91,6 +81,18 @@ const routes = [
     path: '/admin/propostas/modelos',
     name: 'admin.proposals.templates',
     component: () => import('@/pages/Admin/Proposals/TemplatesList.vue'),
+    meta: { role: 'admin' },
+  },
+  {
+    path: '/admin/propostas/:id/editar',
+    name: 'admin.proposals.edit',
+    component: () => import('@/pages/Admin/Proposals/ProposalForm.vue'),
+    meta: { role: 'admin' },
+  },
+  {
+    path: '/admin/propostas/:id',
+    name: 'admin.proposals.show',
+    component: () => import('@/pages/Admin/Proposals/ProposalDetail.vue'),
     meta: { role: 'admin' },
   },
   {
@@ -104,6 +106,17 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition
+    }
+
+    if (to.path === from.path) {
+      return false
+    }
+
+    return { top: 0 }
+  },
 })
 
 router.beforeEach(roleGuard)

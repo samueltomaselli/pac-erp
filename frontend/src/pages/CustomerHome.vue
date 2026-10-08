@@ -2,6 +2,7 @@
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { LogOut } from '@lucide/vue'
+import AlertBanner from '@/components/AlertBanner.vue'
 import BadgeTag from '@/components/BadgeTag.vue'
 import { formatDate, formatDateTime } from '@/constants/domain'
 import { useAuthStore } from '@/stores/useAuthStore'
@@ -35,7 +36,7 @@ async function onLogout() {
 <template>
   <div class="min-h-screen bg-gray-50">
     <header
-      class="sticky top-0 z-30 flex h-14 items-center gap-x-3 border-b border-gray-200 bg-white px-4 lg:px-6"
+      class="sticky top-0 z-30 flex h-16 items-center gap-x-3 border-b border-gray-200 bg-white px-4 lg:px-6"
     >
       <div
         class="flex size-7 shrink-0 items-center justify-center rounded-md bg-theme-light-500 text-[13px] font-semibold text-white"
@@ -49,7 +50,7 @@ async function onLogout() {
         </span>
         <button
           type="button"
-          class="inline-flex size-8 items-center justify-center rounded-md text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-theme-light-500/30"
+          class="inline-flex size-9 items-center justify-center rounded-md text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-theme-light-500/30"
           @click="onLogout"
         >
           <span class="sr-only">Sair</span>
@@ -66,30 +67,25 @@ async function onLogout() {
           </div>
         </div>
       </div>
-      <p
-        v-else-if="error"
-        class="rounded-lg bg-amber-100 px-4 py-3 text-sm text-yellow-700 ring-1 ring-amber-200"
-      >
-        {{ error }}
-      </p>
+      <AlertBanner v-else-if="error" tone="warning">{{ error }}</AlertBanner>
       <div v-else-if="customer" class="space-y-4">
         <section class="panel p-6">
           <h1 class="font-display text-xl font-semibold text-gray-900">{{ customer.name }}</h1>
           <dl class="mt-4 grid gap-4 sm:grid-cols-2">
             <div>
-              <dt class="text-[11px] font-medium text-gray-500">CNPJ/CPF</dt>
+              <dt class="stat-label">CNPJ/CPF</dt>
               <dd class="mono mt-1 text-sm text-gray-900">{{ customer.document_formatted }}</dd>
             </div>
             <div>
-              <dt class="text-[11px] font-medium text-gray-500">Segmento</dt>
+              <dt class="stat-label">Segmento</dt>
               <dd class="mt-1 text-sm text-gray-900">{{ customer.segment_label }}</dd>
             </div>
             <div>
-              <dt class="text-[11px] font-medium text-gray-500">E-mail</dt>
+              <dt class="stat-label">E-mail</dt>
               <dd class="mt-1 truncate text-sm text-gray-900">{{ customer.email }}</dd>
             </div>
             <div>
-              <dt class="text-[11px] font-medium text-gray-500">Telefone</dt>
+              <dt class="stat-label">Telefone</dt>
               <dd class="mt-1 text-sm text-gray-900">{{ customer.phone || '—' }}</dd>
             </div>
           </dl>

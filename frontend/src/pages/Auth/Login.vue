@@ -32,11 +32,11 @@ async function onSubmit() {
     <form class="space-y-4" @submit.prevent="onSubmit">
       <div>
         <label class="field-label" for="email">E-mail</label>
-        <input id="email" v-model="email" type="email" required class="field" />
+        <input id="email" v-model="email" type="email" required autocomplete="email" class="field" />
       </div>
       <div>
         <label class="field-label" for="password">Senha</label>
-        <input id="password" v-model="password" type="password" required class="field" />
+        <input id="password" v-model="password" type="password" required autocomplete="current-password" class="field" />
       </div>
       <p
         v-if="error"
@@ -44,7 +44,7 @@ async function onSubmit() {
       >
         {{ error }}
       </p>
-      <BaseButton type="submit" :disabled="submitting" block>Entrar</BaseButton>
+      <BaseButton type="submit" size="lg" :loading="submitting" block>Entrar</BaseButton>
     </form>
     <template #footer>
       Não tem uma conta?
