@@ -112,7 +112,7 @@ onMounted(load);
               @click="transition(allowedTransition.status)"
               ><Check class="size-3.5" /> Marcar como aceita</BaseButton
             ><BaseButton
-              v-else
+              v-else-if="allowedTransition.status === 'rejected'"
               type="button"
               variant="danger"
               @click="transition(allowedTransition.status)"
