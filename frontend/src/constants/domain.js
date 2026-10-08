@@ -25,6 +25,7 @@ export const PROPOSAL_STATUSES = [
   { value: 'sent', label: 'Enviada' },
   { value: 'accepted', label: 'Aceita' },
   { value: 'rejected', label: 'Recusada' },
+  { value: 'expired', label: 'Vencida' },
 ]
 
 export const PAYMENT_METHODS = [
@@ -60,6 +61,7 @@ export const STATUS_CLASSES = {
   sent: 'bg-blue-100 text-blue-700',
   accepted: 'bg-green-100 text-green-700',
   rejected: 'bg-red-100 text-red-600',
+  expired: 'bg-amber-100 text-amber-800',
 }
 
 export function formatDate(value) {

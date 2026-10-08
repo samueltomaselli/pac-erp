@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\CustomerSegment;
 use App\Enums\CustomerStatus;
+use App\Enums\ProposalStatus;
 use App\Enums\TaskStatus;
 use Database\Factories\CustomerFactory;
 use Illuminate\Database\Eloquent\Builder;
@@ -12,6 +13,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Customer extends Model
@@ -74,6 +76,13 @@ class Customer extends Model
     public function proposals(): HasMany
     {
         return $this->hasMany(Proposal::class);
+    }
+
+    public function currentPlan(): HasOne
+    {
+        return $this->hasOne(Proposal::class)
+            ->where('status', ProposalStatus::Accepted)
+            ->latestOfMany(['decided_at', 'id']);
     }
 
     /**

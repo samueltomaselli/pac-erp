@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Str;
 
 class Proposal extends Model
@@ -73,6 +74,14 @@ class Proposal extends Model
     public function items(): HasMany
     {
         return $this->hasMany(ProposalItem::class);
+    }
+
+    /**
+     * @return HasOne<ProposalAcceptance, $this>
+     */
+    public function acceptance(): HasOne
+    {
+        return $this->hasOne(ProposalAcceptance::class);
     }
 
     public function getReferenceAttribute(): string
