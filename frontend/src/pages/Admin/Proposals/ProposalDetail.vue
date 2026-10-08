@@ -1,6 +1,6 @@
 <script setup>
-import { onMounted, ref } from "vue";
-import { ArrowLeft, Check, Pencil, X } from "@lucide/vue";
+import { computed, onMounted, ref } from "vue";
+import { ArrowLeft, Check, Link2, Pencil, X } from "@lucide/vue";
 import AppLayout from "@/components/AppLayout.vue";
 import BadgeTag from "@/components/BadgeTag.vue";
 import BaseButton from "@/components/BaseButton.vue";
@@ -18,6 +18,25 @@ const router = useRouter();
 const proposal = ref(null);
 const loading = ref(true);
 const error = ref("");
+const linkCopied = ref(false);
+
+const publicUrl = computed(() =>
+  proposal.value?.pub_id
+    ? `${window.location.origin}/proposta/${proposal.value.pub_id}`
+    : null,
+);
+
+async function copyPublicLink() {
+  if (!publicUrl.value) return;
+
+  try {
+    await navigator.clipboard.writeText(publicUrl.value);
+    linkCopied.value = true;
+    setTimeout(() => (linkCopied.value = false), 2000);
+  } catch {
+    window.prompt("Copie o link da proposta:", publicUrl.value);
+  }
+}
 async function load() {
   try {
     proposal.value = await getProposal(route.params.id);
@@ -61,6 +80,13 @@ onMounted(load);
           ><BaseButton type="button" variant="secondary"
             ><ArrowLeft class="size-3.5" /> Voltar</BaseButton
           ></router-link
+        ><BaseButton
+          v-if="publicUrl"
+          type="button"
+          variant="secondary"
+          @click="copyPublicLink"
+          ><Link2 class="size-3.5" />
+          {{ linkCopied ? "Link copiado" : "Copiar link do cliente" }}</BaseButton
         ><router-link
           v-if="proposal?.is_editable"
           :to="{ name: 'admin.proposals.edit', params: { id: proposal.id } }"

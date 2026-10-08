@@ -21,6 +21,7 @@ class PublicProposalResource extends JsonResource
         $status = PublicProposalStatus::for($this->resource);
 
         return [
+            'reference' => $this->reference,
             'title' => $this->title,
             'issued_on' => $this->issued_on?->toDateString(),
             'valid_until' => $this->valid_until?->toDateString(),

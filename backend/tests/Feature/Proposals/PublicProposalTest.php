@@ -135,7 +135,6 @@ class PublicProposalTest extends TestCase
         foreach ([
             'id',
             'pub_id',
-            'reference',
             'customer_id',
             'created_by',
             'sent_at',

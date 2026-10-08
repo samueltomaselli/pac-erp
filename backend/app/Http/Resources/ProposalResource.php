@@ -18,6 +18,7 @@ class ProposalResource extends JsonResource
         return [
             'id' => $this->id,
             'reference' => $this->reference,
+            'pub_id' => $this->when($this->status !== ProposalStatus::Draft, $this->pub_id),
             'customer_id' => $this->customer_id,
             'title' => $this->title,
             'issued_on' => $this->issued_on?->toDateString(),

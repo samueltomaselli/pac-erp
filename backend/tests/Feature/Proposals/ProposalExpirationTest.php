@@ -238,7 +238,9 @@ class ProposalExpirationTest extends TestCase
             $this->assertSame('0 3 * * *', $event->expression);
             $this->assertSame(
                 '2026-10-07 03:00:00',
-                $event->nextRunDate()->setTimezone('America/Sao_Paulo')->format('Y-m-d H:i:s'),
+                Carbon::instance($event->nextRunDate(Carbon::now()))
+                    ->setTimezone('America/Sao_Paulo')
+                    ->format('Y-m-d H:i:s'),
             );
         }
     }
