@@ -5,11 +5,16 @@ namespace Database\Seeders;
 use App\Enums\CustomerSegment;
 use App\Enums\ProposalStatus;
 use App\Enums\TaskPriority;
+use App\Enums\TicketCategory;
+use App\Enums\TicketPriority;
+use App\Enums\TicketStatus;
 use App\Enums\UserRole;
 use App\Models\Customer;
 use App\Models\Proposal;
 use App\Models\ProposalItem;
 use App\Models\Task;
+use App\Models\Ticket;
+use App\Models\TicketComment;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -71,6 +76,32 @@ class DatabaseSeeder extends Seeder
         $this->proposal($prata, $admin, ProposalStatus::Sent, 'Assessoria mensal de crédito');
         $this->proposal($horizonte, $admin, ProposalStatus::Accepted, 'Implantação de processos');
         $this->proposal($alvorada, $admin, ProposalStatus::Rejected, 'Revisão documental');
+
+        $boleto = $this->ticket($alvorada, $alvorada->user, $admin, TicketStatus::WaitingCustomer, TicketCategory::Billing, TicketPriority::High,
+            'Erro ao emitir boleto',
+            'Ao gerar o boleto da mensalidade de outubro, o sistema mostra "falha na comunicação com o banco".');
+        $this->comment($boleto, $admin, 'Olá, Marina. Já estamos verificando com o banco. Pode enviar um print da tela de erro?');
+        $this->comment($boleto, $alvorada->user, 'O erro aparece logo depois de clicar em "Gerar boleto". Tentei duas vezes hoje de manhã.');
+        $this->comment($boleto, $admin, 'Obrigado. Consegue confirmar se o CNPJ do sacado está atualizado no cadastro?');
+
+        $this->ticket($alvorada, $alvorada->user, null, TicketStatus::Open, TicketCategory::Question, TicketPriority::Medium,
+            'Como cadastrar um novo corretor?',
+            'Contratamos um corretor novo e queremos dar acesso a ele. Qual é o procedimento?');
+
+        $repasse = $this->ticket($prata, $admin, $admin, TicketStatus::InProgress, TicketCategory::Problem, TicketPriority::Urgent,
+            'Repasse de comissão não caiu',
+            'O repasse previsto para o dia 15 não foi creditado na conta cadastrada.');
+        $this->comment($repasse, $admin, 'Identificamos o lote do repasse e estamos conferindo com o financeiro.');
+
+        $relatorio = $this->ticket($horizonte, $horizonte->user, $admin, TicketStatus::Resolved, TicketCategory::Request, TicketPriority::Low,
+            'Relatório mensal em planilha',
+            'Gostaríamos de receber o relatório mensal também em formato de planilha.');
+        $this->comment($relatorio, $admin, 'Pronto, a partir deste mês o relatório vai em PDF e em planilha.');
+        $this->comment($relatorio, $horizonte->user, 'Recebemos, muito obrigada!');
+
+        $this->ticket($prata, $prata->user, $admin, TicketStatus::Closed, TicketCategory::Other, TicketPriority::Medium,
+            'Atualizar telefone de contato',
+            'O telefone do financeiro mudou para (11) 3333-4444.');
     }
 
     private function customer(string $name, string $document, string $email, CustomerSegment $segment, string $contact): Customer
@@ -115,5 +146,25 @@ class DatabaseSeeder extends Seeder
         ]);
 
         return $proposal;
+    }
+
+    private function ticket(Customer $customer, User $openedBy, ?User $assignee, TicketStatus $status, TicketCategory $category, TicketPriority $priority, string $title, string $description): Ticket
+    {
+        return Ticket::factory()
+            ->for($customer)
+            ->status($status)
+            ->create([
+                'opened_by' => $openedBy->id,
+                'assigned_to' => $assignee?->id,
+                'category' => $category,
+                'priority' => $priority,
+                'title' => $title,
+                'description' => $description,
+            ]);
+    }
+
+    private function comment(Ticket $ticket, User $author, string $body): TicketComment
+    {
+        return TicketComment::factory()->for($ticket)->by($author)->create(['body' => $body]);
     }
 }
