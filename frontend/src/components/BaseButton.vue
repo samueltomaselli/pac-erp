@@ -1,5 +1,6 @@
 <script setup>
 import { computed } from 'vue'
+import { LoaderCircle } from '@lucide/vue'
 
 const props = defineProps({
   type: { type: String, default: 'submit' },
@@ -11,10 +12,20 @@ const props = defineProps({
   size: { type: String, default: 'md', validator: (s) => ['sm', 'md'].includes(s) },
   disabled: { type: Boolean, default: false },
   block: { type: Boolean, default: false },
+  loading: { type: Boolean, default: false },
+  to: { type: [String, Object], default: null },
+  icon: { type: Boolean, default: false },
+  label: { type: String, default: '' },
 })
 
+const isDisabled = computed(() => props.disabled || props.loading)
+
 const sizeClasses = computed(() =>
-  props.size === 'sm' ? 'h-7 gap-1.5 px-2.5 text-[12px]' : 'h-8 gap-2 px-3 text-[13px]',
+  props.icon
+    ? 'size-8'
+    : props.size === 'sm'
+      ? 'h-7 gap-1.5 px-2.5 text-[12px]'
+      : 'h-8 gap-2 px-3 text-[13px]',
 )
 
 const variantClasses = computed(() => {
@@ -32,9 +43,29 @@ const variantClasses = computed(() => {
 })
 </script>
 <template>
+  <router-link
+    v-if="to && !isDisabled"
+    :to="to"
+    :aria-label="label || undefined"
+    :title="icon ? label || undefined : undefined"
+    :class="[
+      'inline-flex select-none items-center justify-center whitespace-nowrap rounded-md font-medium leading-none tracking-normal',
+      'transition-colors duration-150 ease-out',
+      'focus:outline-none focus-visible:ring-2 focus-visible:ring-theme-light-500/60 focus-visible:ring-offset-2',
+      sizeClasses,
+      variantClasses,
+      block && 'w-full',
+    ]"
+  >
+    <slot />
+  </router-link>
   <button
+    v-else
     :type="type"
-    :disabled="disabled"
+    :disabled="isDisabled"
+    :aria-busy="loading || undefined"
+    :aria-label="label || undefined"
+    :title="icon ? label || undefined : undefined"
     :class="[
       'inline-flex select-none items-center justify-center whitespace-nowrap rounded-md font-medium leading-none tracking-normal',
       'transition-colors duration-150 ease-out',
@@ -45,6 +76,7 @@ const variantClasses = computed(() => {
       block && 'w-full',
     ]"
   >
-    <slot />
+    <LoaderCircle v-if="loading" class="size-3.5 animate-spin" />
+    <slot v-if="!loading || !icon" />
   </button>
 </template>

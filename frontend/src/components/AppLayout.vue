@@ -6,6 +6,7 @@ import {
   FileText,
   LayoutDashboard,
   LogOut,
+  Ticket,
   Users,
 } from "@lucide/vue";
 import AppHeader from "@/components/AppHeader.vue";
@@ -41,6 +42,12 @@ const navigation = [
     label: "Tarefas",
     icon: CheckSquare,
     match: "/admin/tarefas",
+  },
+  {
+    name: "admin.tickets.index",
+    label: "Chamados",
+    icon: Ticket,
+    match: "/admin/chamados",
   },
 ];
 

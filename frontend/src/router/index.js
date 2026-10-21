@@ -58,6 +58,18 @@ const routes = [
     meta: { role: 'admin' },
   },
   {
+    path: '/admin/chamados',
+    name: 'admin.tickets.index',
+    component: () => import('@/pages/Admin/Tickets/TicketsList.vue'),
+    meta: { role: 'admin' },
+  },
+  {
+    path: '/admin/chamados/:id',
+    name: 'admin.tickets.show',
+    component: () => import('@/pages/Admin/Tickets/TicketDetail.vue'),
+    meta: { role: 'admin' },
+  },
+  {
     path: '/admin/propostas',
     name: 'admin.proposals.index',
     component: () => import('@/pages/Admin/Proposals/ProposalsList.vue'),
@@ -97,6 +109,12 @@ const routes = [
     path: '/customer',
     name: 'customer.home',
     component: () => import('@/pages/CustomerHome.vue'),
+    meta: { role: 'customer' },
+  },
+  {
+    path: '/customer/chamados/:id',
+    name: 'customer.tickets.show',
+    component: () => import('@/pages/CustomerTicketDetail.vue'),
     meta: { role: 'customer' },
   },
 ]
