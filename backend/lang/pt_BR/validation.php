@@ -139,5 +139,10 @@ return [
         'priority' => 'prioridade',
         'search' => 'busca',
         'per_page' => 'itens por página',
+        'category' => 'categoria',
+        'assigned_to' => 'responsável',
+        'body' => 'comentário',
+        'attachments' => 'anexos',
+        'attachments.*' => 'anexo',
     ],
 ];

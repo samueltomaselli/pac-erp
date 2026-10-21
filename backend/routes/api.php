@@ -1,11 +1,12 @@
 <?php
 
 use App\Http\Controllers\Admin\CustomerController;
-use App\Http\Controllers\Admin\ProposalController;
-use App\Http\Controllers\Admin\ProposalTemplateController;
 use App\Http\Controllers\Admin\ProposalCatalogItemController;
+use App\Http\Controllers\Admin\ProposalController;
 use App\Http\Controllers\Admin\ProposalItemController;
+use App\Http\Controllers\Admin\ProposalTemplateController;
 use App\Http\Controllers\Admin\TaskController;
+use App\Http\Controllers\Admin\TicketStatusController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Customer\ProfileController;
@@ -58,6 +59,8 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(functi
         ->only(['store', 'update', 'destroy']);
     Route::apiResource('proposal-catalog-items', ProposalCatalogItemController::class)
         ->parameters(['proposal-catalog-items' => 'catalogItem']);
+
+    Route::post('tickets/{ticket}/status', [TicketStatusController::class, 'store'])->name('tickets.status');
 });
 
 Route::middleware(['auth:sanctum', 'role:customer'])->prefix('customer')->group(function () {
