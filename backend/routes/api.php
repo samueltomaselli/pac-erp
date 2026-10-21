@@ -1,14 +1,15 @@
 <?php
 
 use App\Http\Controllers\Admin\CustomerController;
-use App\Http\Controllers\Admin\ProposalController;
-use App\Http\Controllers\Admin\ProposalTemplateController;
 use App\Http\Controllers\Admin\ProposalCatalogItemController;
+use App\Http\Controllers\Admin\ProposalController;
 use App\Http\Controllers\Admin\ProposalItemController;
+use App\Http\Controllers\Admin\ProposalTemplateController;
 use App\Http\Controllers\Admin\TaskController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Customer\ProfileController;
+use App\Http\Controllers\TicketInteractionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -44,6 +45,9 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(functi
     Route::post('proposals/{proposal}/send', [ProposalController::class, 'send'])->name('proposals.send');
     Route::post('proposals/{proposal}/accept', [ProposalController::class, 'accept'])->name('proposals.accept');
     Route::post('proposals/{proposal}/reject', [ProposalController::class, 'reject'])->name('proposals.reject');
+    Route::post('tickets/{ticket}/comments', [TicketInteractionController::class, 'comment']);
+    Route::post('tickets/{ticket}/attachments', [TicketInteractionController::class, 'attachment']);
+    Route::get('ticket-attachments/{attachment}', [TicketInteractionController::class, 'download']);
 
     Route::apiResource('proposal-templates', ProposalTemplateController::class);
     Route::apiResource('proposals.items', ProposalItemController::class)
@@ -56,4 +60,7 @@ Route::middleware(['auth:sanctum', 'role:customer'])->prefix('customer')->group(
     Route::get('/ping', fn () => response()->json(['ok' => true]));
 
     Route::get('/profile', [ProfileController::class, 'show'])->name('customer.profile');
+    Route::post('tickets/{ticket}/comments', [TicketInteractionController::class, 'comment']);
+    Route::post('tickets/{ticket}/attachments', [TicketInteractionController::class, 'attachment']);
+    Route::get('ticket-attachments/{attachment}', [TicketInteractionController::class, 'download']);
 });
