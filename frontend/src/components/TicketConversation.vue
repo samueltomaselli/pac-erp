@@ -133,7 +133,7 @@ async function download(attachment) {
         />
         <TicketAttachmentPicker v-model="attachments" />
         <div class="flex justify-end">
-          <BaseButton type="submit" size="sm" class="!shadow-none" :loading="submitting">
+          <BaseButton type="submit" class="!shadow-none" :loading="submitting">
             <Send class="size-4" />
             Enviar comentário
           </BaseButton>
@@ -150,7 +150,7 @@ async function download(attachment) {
         class="flex items-center justify-between gap-3"
       >
         <span class="truncate text-[13px] text-gray-700">{{ attachment.original_name }}</span>
-        <BaseButton variant="ghost" size="sm" class="!shadow-none" @click="download(attachment)">
+        <BaseButton variant="ghost" class="!shadow-none" @click="download(attachment)">
           <Download class="size-4" />
           Baixar
         </BaseButton>

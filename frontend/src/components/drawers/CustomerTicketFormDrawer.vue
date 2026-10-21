@@ -84,8 +84,8 @@ async function onSubmit() {
       </FormField>
     </form>
     <template #footer>
-      <BaseButton variant="secondary" size="sm" class="!shadow-none" @click="emit('close')">Cancelar</BaseButton>
-      <BaseButton type="submit" form="customer-ticket-form" size="sm" class="!shadow-none" :loading="submitting">
+      <BaseButton variant="secondary" class="!shadow-none" @click="emit('close')">Cancelar</BaseButton>
+      <BaseButton type="submit" form="customer-ticket-form" class="!shadow-none" :loading="submitting">
         Abrir chamado
       </BaseButton>
     </template>

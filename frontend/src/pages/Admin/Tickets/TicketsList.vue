@@ -92,7 +92,7 @@ onMounted(() => {
 <template>
   <AppLayout title="Chamados" subtitle="Acompanhe as solicitações dos clientes">
     <template #actions>
-      <BaseButton size="sm" class="!shadow-none" @click="drawerOpen = true">
+      <BaseButton class="!shadow-none" @click="drawerOpen = true">
         <Plus class="size-4" />
         Abrir chamado
       </BaseButton>
@@ -119,7 +119,7 @@ onMounted(() => {
           {{ customer.name }}
         </option>
       </select>
-      <BaseButton v-if="hasFilters" variant="ghost" size="sm" class="!shadow-none" @click="clearFilters">
+      <BaseButton v-if="hasFilters" variant="ghost" class="!shadow-none" @click="clearFilters">
         <X class="size-4" />
         Limpar
       </BaseButton>

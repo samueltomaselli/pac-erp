@@ -27,7 +27,6 @@ function go(page) {
       <BaseButton
         type="button"
         variant="ghost"
-        size="sm"
         icon
         label="Página anterior"
         :disabled="meta.current_page <= 1"
@@ -41,7 +40,6 @@ function go(page) {
       <BaseButton
         type="button"
         variant="ghost"
-        size="sm"
         icon
         label="Próxima página"
         :disabled="meta.current_page >= meta.last_page"

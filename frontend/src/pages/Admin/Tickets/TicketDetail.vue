@@ -143,7 +143,6 @@ onMounted(loadStaff)
               v-for="transition in transitions"
               :key="transition.status"
               :variant="transition.status === 'closed' ? 'danger' : 'secondary'"
-              size="sm"
               class="!shadow-none"
               :disabled="saving"
               @click="changeStatus(transition)"

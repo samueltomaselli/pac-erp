@@ -59,7 +59,7 @@ watch(() => route.params.id, loadTicket, { immediate: true })
       </div>
     </header>
     <main class="mx-auto max-w-4xl space-y-4 px-4 py-6 lg:px-6">
-      <BaseButton variant="ghost" size="sm" class="!shadow-none" :to="{ name: 'customer.home' }">
+      <BaseButton variant="ghost" class="!shadow-none" :to="{ name: 'customer.home' }">
         <ArrowLeft class="size-4" />
         Meus chamados
       </BaseButton>
