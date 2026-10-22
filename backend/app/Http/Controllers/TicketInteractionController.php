@@ -13,6 +13,7 @@ use App\Models\TicketAttachment;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Throwable;
@@ -21,8 +22,6 @@ class TicketInteractionController extends Controller
 {
     public function comment(StoreTicketCommentRequest $request, Ticket $ticket, AddTicketComment $addComment): TicketCommentResource
     {
-        $this->authorizeTicket($request, $ticket);
-
         $comment = $addComment->handle(
             $ticket,
             $request->user(),
@@ -35,8 +34,6 @@ class TicketInteractionController extends Controller
 
     public function attachment(StoreTicketAttachmentRequest $request, Ticket $ticket): JsonResponse
     {
-        $this->authorizeTicket($request, $ticket);
-
         if ($ticket->status === TicketStatus::Closed) {
             throw ValidationException::withMessages(['ticket' => 'Chamado fechado não aceita novos anexos.']);
         }
@@ -78,24 +75,8 @@ class TicketInteractionController extends Controller
 
     public function download(Request $request, TicketAttachment $attachment)
     {
-        $this->authorizeAttachment($request, $attachment);
+        Gate::authorize('view', $attachment->ticket);
 
         return Storage::disk($attachment->disk)->download($attachment->path, $attachment->original_name);
-    }
-
-    private function authorizeAttachment(Request $request, TicketAttachment $attachment): void
-    {
-        if ($request->user()->role->value === 'customer'
-            && $attachment->ticket->customer_id !== $request->user()->customer?->id) {
-            abort(404);
-        }
-    }
-
-    private function authorizeTicket(Request $request, Ticket $ticket): void
-    {
-        if ($request->user()->role->value === 'customer'
-            && $ticket->customer_id !== $request->user()->customer?->id) {
-            abort(404);
-        }
     }
 }

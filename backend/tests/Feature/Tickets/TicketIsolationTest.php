@@ -4,8 +4,11 @@ namespace Tests\Feature\Tickets;
 
 use App\Models\Customer;
 use App\Models\Ticket;
+use App\Models\TicketAttachment;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 /**
@@ -168,6 +171,76 @@ class TicketIsolationTest extends TestCase
             ->assertExactJson(['message' => 'Nenhum cliente vinculado a este acesso.']);
 
         $this->assertDatabaseCount('tickets', 1);
+    }
+
+    public function test_a_customer_cannot_comment_on_another_customers_ticket(): void
+    {
+        [$a, , , $ticketB] = $this->twoCustomers();
+
+        $this->actingAs($a->user)->postJson("/api/customer/tickets/{$ticketB->id}/comments", [
+            'body' => 'Tentando comentar no chamado alheio.',
+        ])->assertStatus(404)
+            ->assertDontSee($ticketB->title);
+
+        $this->assertDatabaseCount('ticket_comments', 0);
+    }
+
+    public function test_an_invalid_body_on_another_customers_ticket_still_answers_404(): void
+    {
+        [$a, , , $ticketB] = $this->twoCustomers();
+
+        $this->actingAs($a->user)->postJson("/api/customer/tickets/{$ticketB->id}/comments", ['body' => ''])
+            ->assertStatus(404)
+            ->assertJsonMissingPath('errors');
+    }
+
+    public function test_a_customer_cannot_attach_to_another_customers_ticket(): void
+    {
+        Storage::fake('local');
+        [$a, , , $ticketB] = $this->twoCustomers();
+
+        $this->actingAs($a->user)->post("/api/customer/tickets/{$ticketB->id}/attachments", [
+            'attachments' => [UploadedFile::fake()->create('invasao.pdf', 10, 'application/pdf')],
+        ], ['Accept' => 'application/json'])->assertStatus(404);
+
+        $this->assertDatabaseCount('ticket_attachments', 0);
+        $this->assertSame([], Storage::disk('local')->allFiles());
+    }
+
+    public function test_a_customer_cannot_download_another_customers_attachment(): void
+    {
+        Storage::fake('local');
+        [$a, $ticketA, , $ticketB] = $this->twoCustomers();
+        $foreign = TicketAttachment::factory()->for($ticketB)->create();
+        Storage::disk('local')->put($foreign->path, 'conteúdo de B');
+        $own = TicketAttachment::factory()->for($ticketA)->create();
+        Storage::disk('local')->put($own->path, 'conteúdo de A');
+
+        $this->actingAs($a->user)->get("/api/customer/ticket-attachments/{$foreign->id}", ['Accept' => 'application/json'])
+            ->assertStatus(404);
+        $this->get("/api/customer/ticket-attachments/{$own->id}")->assertOk();
+    }
+
+    public function test_a_customer_cannot_change_another_authors_comment(): void
+    {
+        [$a, $ticketA] = $this->customerWithTicket();
+        $admin = User::factory()->admin()->create();
+        $comment = $ticketA->comments()->create(['user_id' => $admin->id, 'body' => 'Resposta da equipe']);
+
+        $this->actingAs($a->user)->putJson("/api/customer/tickets/{$ticketA->id}/comments/{$comment->id}", ['body' => 'Alterado'])
+            ->assertStatus(404);
+        $this->deleteJson("/api/customer/tickets/{$ticketA->id}/comments/{$comment->id}")
+            ->assertStatus(404);
+
+        $this->assertSame('Resposta da equipe', $comment->fresh()->body);
+    }
+
+    public function test_a_customer_cannot_use_the_admin_interaction_routes(): void
+    {
+        [$a, $ticketA] = $this->customerWithTicket();
+
+        $this->actingAs($a->user)->postJson("/api/admin/tickets/{$ticketA->id}/comments", ['body' => 'Oi'])
+            ->assertStatus(403);
     }
 
     /**

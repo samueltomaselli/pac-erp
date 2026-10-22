@@ -3,9 +3,17 @@
 namespace App\Http\Requests\Tickets;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Gate;
 
 class StoreTicketAttachmentRequest extends FormRequest
 {
+    public function authorize(): bool
+    {
+        Gate::authorize('view', $this->route('ticket'));
+
+        return true;
+    }
+
     public function rules(): array
     {
         return [
