@@ -1,14 +1,19 @@
 <?php
 
 use App\Http\Controllers\Admin\CustomerController;
-use App\Http\Controllers\Admin\ProposalController;
-use App\Http\Controllers\Admin\ProposalTemplateController;
 use App\Http\Controllers\Admin\ProposalCatalogItemController;
+use App\Http\Controllers\Admin\ProposalController;
 use App\Http\Controllers\Admin\ProposalItemController;
+use App\Http\Controllers\Admin\ProposalTemplateController;
+use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Admin\TaskController;
+use App\Http\Controllers\Admin\TicketAssigneeController;
+use App\Http\Controllers\Admin\TicketController;
+use App\Http\Controllers\Admin\TicketStatusController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Customer\ProfileController;
+use App\Http\Controllers\Customer\TicketController as CustomerTicketController;
 use App\Http\Controllers\PublicProposalController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -58,10 +63,19 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(functi
         ->only(['store', 'update', 'destroy']);
     Route::apiResource('proposal-catalog-items', ProposalCatalogItemController::class)
         ->parameters(['proposal-catalog-items' => 'catalogItem']);
+
+    Route::apiResource('tickets', TicketController::class)->except(['destroy']);
+    Route::post('tickets/{ticket}/status', [TicketStatusController::class, 'store'])->name('tickets.status');
+    Route::put('tickets/{ticket}/assignee', [TicketAssigneeController::class, 'update'])->name('tickets.assignee');
+    Route::get('staff', [StaffController::class, 'index'])->name('staff.index');
 });
 
 Route::middleware(['auth:sanctum', 'role:customer'])->prefix('customer')->group(function () {
     Route::get('/ping', fn () => response()->json(['ok' => true]));
 
     Route::get('/profile', [ProfileController::class, 'show'])->name('customer.profile');
+
+    Route::get('tickets', [CustomerTicketController::class, 'index'])->name('customer.tickets.index');
+    Route::post('tickets', [CustomerTicketController::class, 'store'])->name('customer.tickets.store');
+    Route::get('tickets/{ticket}', [CustomerTicketController::class, 'show'])->name('customer.tickets.show');
 });

@@ -1,5 +1,7 @@
 <?php
-//Customer
+
+// Customer
+
 namespace App\Models;
 
 use App\Enums\CustomerSegment;
@@ -76,6 +78,12 @@ class Customer extends Model
     public function proposals(): HasMany
     {
         return $this->hasMany(Proposal::class);
+    }
+
+    /** @return HasMany<Ticket, $this> */
+    public function tickets(): HasMany
+    {
+        return $this->hasMany(Ticket::class);
     }
 
     public function currentPlan(): HasOne
