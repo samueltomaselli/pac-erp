@@ -76,8 +76,26 @@ watch(() => route.params.id, loadTicket, { immediate: true })
           </div>
           <h1 class="mt-2 wrap-break-word text-xl font-semibold text-gray-900">{{ ticket.title }}</h1>
           <p class="mt-1 text-[13px] text-gray-500">
-            {{ ticket.category_label }} · Aberto em {{ formatDateTime(ticket.opened_at) }}
+            {{ ticket.category_label }}
           </p>
+          <dl class="mt-4 grid gap-3 border-t border-gray-100 pt-4 sm:grid-cols-2">
+            <div>
+              <dt class="stat-label">Aberto em</dt>
+              <dd class="mt-0.5 text-[13px] text-gray-700">{{ formatDateTime(ticket.opened_at) }}</dd>
+            </div>
+            <div>
+              <dt class="stat-label">Última atualização</dt>
+              <dd class="mt-0.5 text-[13px] text-gray-700">{{ formatDateTime(ticket.updated_at) }}</dd>
+            </div>
+            <div v-if="ticket.resolved_at">
+              <dt class="stat-label">Resolvido em</dt>
+              <dd class="mt-0.5 text-[13px] text-gray-700">{{ formatDateTime(ticket.resolved_at) }}</dd>
+            </div>
+            <div v-if="ticket.closed_at">
+              <dt class="stat-label">Fechado em</dt>
+              <dd class="mt-0.5 text-[13px] text-gray-700">{{ formatDateTime(ticket.closed_at) }}</dd>
+            </div>
+          </dl>
           <p class="mt-4 whitespace-pre-wrap text-sm leading-6 text-gray-700">{{ ticket.description }}</p>
         </section>
         <AlertBanner v-if="ticket.status === 'waiting_customer'" tone="warning">

@@ -11,6 +11,7 @@ import { createTicket } from '@/utils/api/tickets'
 const props = defineProps({
   open: { type: Boolean, default: false },
   customers: { type: Array, default: () => [] },
+  initialCustomerId: { type: [Number, String], default: '' },
 })
 
 const emit = defineEmits(['close', 'saved'])
@@ -31,7 +32,7 @@ watch(
   (open) => {
     if (!open) return
     Object.assign(form, {
-      customer_id: '',
+      customer_id: props.initialCustomerId,
       title: '',
       category: '',
       priority: 'medium',
