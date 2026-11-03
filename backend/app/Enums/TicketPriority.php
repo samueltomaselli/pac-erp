@@ -9,6 +9,19 @@ enum TicketPriority: string
     case Medium = 'medium';
     case Low = 'low';
 
+    /**
+     * @return list<string>
+     */
+    public static function sortOrder(): array
+    {
+        return [
+            self::Urgent->value,
+            self::High->value,
+            self::Medium->value,
+            self::Low->value,
+        ];
+    }
+
     public function label(): string
     {
         return match ($this) {
