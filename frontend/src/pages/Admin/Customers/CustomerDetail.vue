@@ -9,6 +9,7 @@ import BaseButton from '@/components/BaseButton.vue'
 import TaskCheck from '@/components/TaskCheck.vue'
 import CustomerFormDrawer from '@/components/drawers/CustomerFormDrawer.vue'
 import TaskFormDrawer from '@/components/drawers/TaskFormDrawer.vue'
+import TicketFormDrawer from '@/components/drawers/TicketFormDrawer.vue'
 import { formatCurrency, formatDate, formatDateTime } from '@/constants/domain'
 import { errorMessage, useToast } from '@/composables/useToast'
 import { getCustomer } from '@/utils/api/customers'
@@ -23,6 +24,7 @@ const loading = ref(true)
 const error = ref('')
 const editOpen = ref(route.query.editar === '1')
 const taskDrawer = ref({ open: false, task: null })
+const ticketDrawerOpen = ref(false)
 const togglingId = ref(null)
 
 async function fetchCustomer({ silent = false } = {}) {
@@ -78,7 +80,7 @@ onMounted(fetchCustomer)
 <template>
   <AppLayout
     :title="customer?.name ?? 'Cliente'"
-    subtitle="Dados cadastrais, tarefas e propostas"
+    subtitle="Dados cadastrais, tarefas, propostas e chamados"
     :back="{ name: 'admin.customers.index' }"
   >
     <template #actions>
@@ -172,6 +174,67 @@ onMounted(fetchCustomer)
       </aside>
 
       <div class="space-y-4 lg:col-span-2">
+        <section class="panel overflow-hidden">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-200 px-5 py-3">
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <h2 class="text-sm font-semibold text-gray-900">
+                Chamados
+                <span class="ml-1 text-xs font-normal tabular-nums text-gray-500">{{ customer.tickets_count ?? customer.tickets?.length ?? 0 }}</span>
+              </h2>
+              <span
+                v-if="customer.open_tickets_count"
+                class="text-xs font-medium text-amber-700"
+              >
+                {{ customer.open_tickets_count }} em andamento
+              </span>
+            </div>
+            <div class="flex items-center gap-3">
+              <BaseButton
+                v-if="!customer.deleted_at && customer.status === 'active'"
+                variant="secondary"
+                size="sm"
+                class="!shadow-none"
+                @click="ticketDrawerOpen = true"
+              >
+                <Plus class="size-3.5" />
+                Abrir chamado
+              </BaseButton>
+              <router-link
+                :to="{ name: 'admin.tickets.index', query: { customer_id: customer.id } }"
+                class="link text-xs"
+              >
+                Ver todos na fila
+              </router-link>
+            </div>
+          </div>
+          <p v-if="!customer.tickets?.length" class="px-5 py-10 text-center text-sm text-gray-500">
+            Nenhum chamado aberto para este cliente.
+          </p>
+          <ul v-else class="divide-y divide-gray-100">
+            <li v-for="ticket in customer.tickets" :key="ticket.id">
+              <router-link
+                :to="{ name: 'admin.tickets.show', params: { id: ticket.id } }"
+                class="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-3 transition-colors hover:bg-gray-50"
+              >
+                <div class="min-w-0 flex-1 basis-48">
+                  <p class="truncate text-sm font-medium text-gray-900">
+                    <span class="mono mr-2 text-xs text-gray-500">{{ ticket.reference }}</span>
+                    {{ ticket.title }}
+                  </p>
+                  <p class="mt-1 text-xs text-gray-500">
+                    {{ ticket.assignee?.name || 'Sem responsável' }}
+                    · Atualizado em {{ formatDateTime(ticket.updated_at) }}
+                  </p>
+                </div>
+                <div class="flex shrink-0 items-center gap-1.5">
+                  <BadgeTag :label="ticket.priority_label" :tone="ticket.priority" />
+                  <BadgeTag :label="ticket.status_label" :tone="ticket.status" />
+                </div>
+              </router-link>
+            </li>
+          </ul>
+        </section>
+
         <section class="panel overflow-hidden">
           <div class="flex items-center justify-between gap-3 border-b border-gray-200 px-5 py-3">
             <h2 class="text-sm font-semibold text-gray-900">
@@ -282,6 +345,13 @@ onMounted(fetchCustomer)
       :customer-id="customer?.id ?? ''"
       lock-customer
       @close="taskDrawer.open = false"
+      @saved="fetchCustomer({ silent: true })"
+    />
+    <TicketFormDrawer
+      :open="ticketDrawerOpen"
+      :customers="customer ? [customer] : []"
+      :initial-customer-id="customer?.id ?? ''"
+      @close="ticketDrawerOpen = false"
       @saved="fetchCustomer({ silent: true })"
     />
   </AppLayout>

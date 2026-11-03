@@ -114,7 +114,7 @@ onMounted(loadStaff)
   <AppLayout
     :title="ticket ? ticket.reference : 'Chamado'"
     :subtitle="ticket?.title || 'Detalhes da solicitação'"
-    :back="{ name: 'admin.tickets.index' }"
+    :back="{ name: 'admin.tickets.index', query: route.query }"
     width="wide"
   >
     <div v-if="loading" class="panel space-y-4 p-6">
@@ -134,8 +134,7 @@ onMounted(loadStaff)
             </div>
             <h1 class="mt-2 wrap-break-word text-xl font-semibold text-gray-900">{{ ticket.title }}</h1>
             <p class="mt-1 text-[13px] text-gray-500">
-              {{ ticket.customer?.name }} · {{ ticket.category_label }} · Aberto em
-              {{ formatDateTime(ticket.opened_at) }}
+              {{ ticket.customer?.name }} · {{ ticket.category_label }}
             </p>
           </div>
           <div v-if="transitions.length" class="flex flex-wrap gap-2">
@@ -185,6 +184,24 @@ onMounted(loadStaff)
           <h2 class="text-[13px] font-semibold text-gray-700">Descrição</h2>
           <p class="mt-2 whitespace-pre-wrap text-sm leading-6 text-gray-700">{{ ticket.description }}</p>
         </div>
+        <dl class="mt-4 grid gap-3 border-t border-gray-100 pt-4 sm:grid-cols-2">
+          <div>
+            <dt class="stat-label">Aberto em</dt>
+            <dd class="mt-0.5 text-[13px] text-gray-700">{{ formatDateTime(ticket.opened_at) }}</dd>
+          </div>
+          <div>
+            <dt class="stat-label">Última atualização</dt>
+            <dd class="mt-0.5 text-[13px] text-gray-700">{{ formatDateTime(ticket.updated_at) }}</dd>
+          </div>
+          <div v-if="ticket.resolved_at">
+            <dt class="stat-label">Resolvido em</dt>
+            <dd class="mt-0.5 text-[13px] text-gray-700">{{ formatDateTime(ticket.resolved_at) }}</dd>
+          </div>
+          <div v-if="ticket.closed_at">
+            <dt class="stat-label">Fechado em</dt>
+            <dd class="mt-0.5 text-[13px] text-gray-700">{{ formatDateTime(ticket.closed_at) }}</dd>
+          </div>
+        </dl>
       </section>
       <TicketConversation :ticket="ticket" @updated="loadTicket" />
     </div>
