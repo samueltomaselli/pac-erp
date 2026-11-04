@@ -50,7 +50,12 @@ class CustomerController extends Controller
             'tasks' => fn ($query) => $query->orderBy('status')->orderBy('due_date'),
             'proposals' => fn ($query) => $query->with('items')->latest('issued_on')->latest('id'),
             'currentPlan.items',
-        ])->loadCount(['tasks', 'pendingTasks', 'proposals']);
+            'tickets' => fn ($query) => $query
+                ->with('assignee')
+                ->withCount('comments')
+                ->latest('updated_at')
+                ->latest('id'),
+        ])->loadCount(['tasks', 'pendingTasks', 'proposals', 'tickets', 'openTickets']);
 
         return new CustomerResource($customer);
     }

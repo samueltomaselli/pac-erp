@@ -42,6 +42,9 @@ class CustomerResource extends JsonResource
             'pending_tasks_count' => $this->whenCounted('pendingTasks'),
             'proposals' => ProposalResource::collection($this->whenLoaded('proposals')),
             'proposals_count' => $this->whenCounted('proposals'),
+            'tickets' => TicketResource::collection($this->whenLoaded('tickets')),
+            'tickets_count' => $this->whenCounted('tickets'),
+            'open_tickets_count' => $this->whenCounted('openTickets'),
             'current_plan' => $this->whenLoaded('currentPlan', fn () => $this->currentPlan ? [
                 'reference' => $this->currentPlan->reference,
                 'title' => $this->currentPlan->title,
