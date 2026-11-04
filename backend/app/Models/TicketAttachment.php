@@ -13,6 +13,13 @@ class TicketAttachment extends Model
     use HasFactory;
 
     /**
+     * Anexo novo, mesmo sem comentário, vira a "última atualização" do chamado (RF-25).
+     *
+     * @var list<string>
+     */
+    protected $touches = ['ticket'];
+
+    /**
      * @var list<string>
      */
     protected $fillable = [
