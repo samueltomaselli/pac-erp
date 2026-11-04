@@ -33,7 +33,7 @@ class TicketController extends Controller
             ->with(['customer', 'assignee', 'openedBy'])
             ->withCount('comments')
             ->when($request->filled('status'), fn ($query) => $query->where('status', $request->input('status')))
-            ->orderByDesc('created_at')
+            ->orderByDesc('updated_at')
             ->orderByDesc('id')
             ->paginate($request->integer('per_page', 15))
             ->withQueryString();
