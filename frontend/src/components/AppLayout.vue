@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   Package,
   TextQuote,
+  Ticket,
   Users,
 } from '@lucide/vue'
 import AppHeader from '@/components/AppHeader.vue'
@@ -39,6 +40,7 @@ const navigation = [
         exclude: ['/admin/propostas/catalogo', '/admin/propostas/modelos'],
       },
       { name: 'admin.tasks.index', label: 'Tarefas', icon: CheckSquare, match: '/admin/tarefas' },
+      { name: 'admin.tickets.index', label: 'Chamados', icon: Ticket, match: '/admin/chamados' },
     ],
   },
   {

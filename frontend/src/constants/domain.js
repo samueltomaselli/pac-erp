@@ -15,6 +15,29 @@ export const TASK_PRIORITIES = [
   { value: 'low', label: 'Baixa' },
 ]
 
+export const TICKET_STATUSES = [
+  { value: 'open', label: 'Aberto' },
+  { value: 'in_progress', label: 'Em atendimento' },
+  { value: 'waiting_customer', label: 'Aguardando cliente' },
+  { value: 'resolved', label: 'Resolvido' },
+  { value: 'closed', label: 'Fechado' },
+]
+
+export const TICKET_PRIORITIES = [
+  { value: 'urgent', label: 'Urgente' },
+  { value: 'high', label: 'Alta' },
+  { value: 'medium', label: 'Média' },
+  { value: 'low', label: 'Baixa' },
+]
+
+export const TICKET_CATEGORIES = [
+  { value: 'question', label: 'Dúvida' },
+  { value: 'problem', label: 'Problema' },
+  { value: 'request', label: 'Solicitação' },
+  { value: 'billing', label: 'Financeiro' },
+  { value: 'other', label: 'Outro' },
+]
+
 export const TASK_STATUSES = [
   { value: 'pending', label: 'Pendente' },
   { value: 'completed', label: 'Concluída' },
@@ -47,12 +70,18 @@ export const PROPOSAL_TEMPLATE_TYPES = [
 ]
 
 export const PRIORITY_CLASSES = {
+  urgent: 'bg-red-700 text-white',
   high: 'bg-red-100 text-red-600',
   medium: 'bg-amber-100 text-yellow-700',
   low: 'bg-white text-gray-600 ring-1 ring-gray-200',
 }
 
 export const STATUS_CLASSES = {
+  open: 'bg-blue-100 text-blue-700',
+  in_progress: 'bg-sky-100 text-sky-700',
+  waiting_customer: 'bg-amber-100 text-amber-800',
+  resolved: 'bg-green-100 text-green-700',
+  closed: 'bg-gray-100 text-gray-600',
   active: 'bg-green-100 text-green-700',
   inactive: 'bg-white text-gray-600 ring-1 ring-gray-200',
   pending: 'bg-blue-100 text-blue-700',
