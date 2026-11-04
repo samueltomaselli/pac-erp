@@ -10,8 +10,7 @@ defineProps({
 <template>
   <div>
     <label class="field-label" :for="name">
-      {{ label }}
-      <span v-if="required" class="text-red-500" aria-hidden="true">*</span>
+      {{ label }}<span v-if="required" class="text-red-500" aria-hidden="true"> *</span>
     </label>
     <slot />
     <p v-if="errors[name]" class="mt-1 text-xs text-red-600">{{ errors[name][0] }}</p>

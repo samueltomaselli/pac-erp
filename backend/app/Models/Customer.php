@@ -8,6 +8,7 @@ use App\Enums\CustomerSegment;
 use App\Enums\CustomerStatus;
 use App\Enums\ProposalStatus;
 use App\Enums\TaskStatus;
+use App\Enums\TicketStatus;
 use Database\Factories\CustomerFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -99,6 +100,20 @@ class Customer extends Model
     public function pendingTasks(): HasMany
     {
         return $this->tasks()->where('status', TaskStatus::Pending);
+    }
+
+    /**
+     * Chamados em andamento: aberto, em atendimento e aguardando cliente.
+     *
+     * @return HasMany<Ticket, $this>
+     */
+    public function openTickets(): HasMany
+    {
+        return $this->tickets()->whereIn('status', [
+            TicketStatus::Open,
+            TicketStatus::InProgress,
+            TicketStatus::WaitingCustomer,
+        ]);
     }
 
     /**

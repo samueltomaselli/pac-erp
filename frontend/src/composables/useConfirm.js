@@ -24,12 +24,8 @@ export function useConfirm() {
     cancelLabel = 'Cancelar',
     tone = 'primary',
   }) {
-    if (confirmState.resolve) {
-      confirmState.resolve(false)
-    }
-
+    if (confirmState.resolve) confirmState.resolve(false)
     Object.assign(confirmState, { title, message, confirmLabel, cancelLabel, tone, open: true })
-
     return new Promise((resolve) => {
       confirmState.resolve = resolve
     })

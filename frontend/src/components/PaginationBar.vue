@@ -9,28 +9,24 @@ const props = defineProps({
 const emit = defineEmits(['change'])
 
 function go(page) {
-  if (!props.meta || page < 1 || page > props.meta.last_page) {
-    return
-  }
-
+  if (!props.meta || page < 1 || page > props.meta.last_page) return
   emit('change', page)
 }
 </script>
+
 <template>
   <div
     v-if="meta && meta.total > 0"
     class="flex flex-wrap items-center justify-between gap-3 border-t border-gray-200 px-4 py-2.5"
   >
     <span class="text-xs text-gray-500">
-      <template v-if="meta.from">
-        <span class="tabular-nums">{{ meta.from }}–{{ meta.to }}</span> de
-      </template>
+      <template v-if="meta.from"><span class="tabular-nums">{{ meta.from }}–{{ meta.to }}</span> de </template>
       <span class="tabular-nums">{{ meta.total }}</span> registro(s)
     </span>
     <div v-if="meta.last_page > 1" class="flex items-center gap-1">
       <BaseButton
+        type="button"
         variant="ghost"
-        size="sm"
         icon
         label="Página anterior"
         :disabled="meta.current_page <= 1"
@@ -42,8 +38,8 @@ function go(page) {
         {{ meta.current_page }} / {{ meta.last_page }}
       </span>
       <BaseButton
+        type="button"
         variant="ghost"
-        size="sm"
         icon
         label="Próxima página"
         :disabled="meta.current_page >= meta.last_page"

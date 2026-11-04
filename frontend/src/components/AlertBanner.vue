@@ -1,17 +1,14 @@
 <script setup>
 import { computed } from 'vue'
-import { CircleAlert, CircleCheck, Info, TriangleAlert, X } from '@lucide/vue'
+import { CircleAlert, CircleCheck, Info, TriangleAlert } from '@lucide/vue'
 
 const props = defineProps({
   tone: {
     type: String,
     default: 'error',
-    validator: (v) => ['error', 'warning', 'success', 'info'].includes(v),
+    validator: (value) => ['error', 'warning', 'success', 'info'].includes(value),
   },
-  dismissible: { type: Boolean, default: false },
 })
-
-defineEmits(['dismiss'])
 
 const styles = {
   error: { box: 'bg-red-50 text-red-700 ring-red-200', icon: CircleAlert },
@@ -22,6 +19,7 @@ const styles = {
 
 const current = computed(() => styles[props.tone])
 </script>
+
 <template>
   <div
     :role="tone === 'error' ? 'alert' : 'status'"
@@ -32,14 +30,5 @@ const current = computed(() => styles[props.tone])
     <div class="min-w-0 flex-1">
       <slot />
     </div>
-    <button
-      v-if="dismissible"
-      type="button"
-      class="-m-1 rounded p-1 opacity-70 hover:opacity-100"
-      @click="$emit('dismiss')"
-    >
-      <span class="sr-only">Fechar aviso</span>
-      <X class="size-4" />
-    </button>
   </div>
 </template>

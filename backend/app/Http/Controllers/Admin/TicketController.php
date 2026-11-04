@@ -22,12 +22,9 @@ class TicketController extends Controller
     public function index(IndexTicketRequest $request): AnonymousResourceCollection
     {
         $tickets = Ticket::query()
+            ->filter($request->validated())
             ->with(['customer', 'assignee', 'openedBy'])
             ->withCount('comments')
-            ->when($request->filled('customer_id'), fn ($query) => $query->where('customer_id', $request->integer('customer_id')))
-            ->when($request->filled('status'), fn ($query) => $query->where('status', $request->input('status')))
-            ->orderByDesc('created_at')
-            ->orderByDesc('id')
             ->paginate($request->integer('per_page', 15))
             ->withQueryString();
 
