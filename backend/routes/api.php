@@ -57,6 +57,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(functi
     Route::apiResource('proposals', ProposalController::class);
     Route::post('proposals/{proposal}/send', [ProposalController::class, 'send'])->name('proposals.send');
     Route::post('proposals/{proposal}/accept', [ProposalController::class, 'accept'])->name('proposals.accept');
+    Route::get('proposals/{proposal}/signature', [ProposalController::class, 'signature'])->name('proposals.signature');
     Route::post('proposals/{proposal}/reject', [ProposalController::class, 'reject'])->name('proposals.reject');
 
     Route::apiResource('proposal-templates', ProposalTemplateController::class);

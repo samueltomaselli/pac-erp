@@ -43,6 +43,14 @@ class ProposalResource extends JsonResource
             'sent_at' => $this->sent_at?->toIso8601String(),
             'decided_at' => $this->decided_at?->toIso8601String(),
             'created_at' => $this->created_at?->toIso8601String(),
+            'acceptance' => $this->whenLoaded('acceptance', fn () => $this->acceptance ? [
+                'name' => $this->acceptance->name,
+                'document' => $this->acceptance->document,
+                'email' => $this->acceptance->email,
+                'ip_address' => $this->acceptance->ip_address,
+                'accepted_at' => $this->acceptance->accepted_at->toIso8601String(),
+                'has_signature' => $this->acceptance->signature_path !== null,
+            ] : null),
             'customer' => $this->whenLoaded('customer', fn () => [
                 'id' => $this->customer->id,
                 'name' => $this->customer->name,

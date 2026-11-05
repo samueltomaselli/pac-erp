@@ -15,6 +15,7 @@ class ProposalAcceptance extends Model
         'name',
         'document',
         'email',
+        'signature_path',
         'ip_address',
         'user_agent',
         'accepted_at',

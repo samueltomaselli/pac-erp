@@ -45,3 +45,8 @@ export function acceptProposal(id) {
 export function rejectProposal(id) {
   return httpClient.post(`${resource}/${id}/reject`).then((response) => response.data.data)
 }
+export function getProposalSignature(id) {
+  return httpClient
+    .get(`${resource}/${id}/signature`, { responseType: 'blob' })
+    .then((response) => response.data)
+}

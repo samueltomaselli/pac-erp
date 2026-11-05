@@ -4,6 +4,7 @@ namespace App\Http\Requests\Proposals;
 
 use App\Enums\PublicProposalStatus;
 use App\Rules\CpfOrCnpj;
+use App\Rules\SignatureImage;
 use Illuminate\Foundation\Http\FormRequest;
 
 class AcceptPublicProposalRequest extends FormRequest
@@ -35,6 +36,19 @@ class AcceptPublicProposalRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'document' => ['required', 'string', new CpfOrCnpj],
             'email' => ['required', 'string', 'email', 'max:255'],
+            'signature' => ['required', 'string', new SignatureImage],
+            'agreed' => ['accepted'],
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'signature.required' => 'Assine no quadro antes de aceitar a proposta.',
+            'agreed.accepted' => 'Confirme que concorda com a assinatura eletrônica.',
         ];
     }
 }

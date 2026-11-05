@@ -7,6 +7,7 @@ use App\Models\Proposal;
 use App\Models\ProposalAcceptance;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class PublicProposalAcceptanceTest extends TestCase
@@ -16,6 +17,8 @@ class PublicProposalAcceptanceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        Storage::fake('local');
 
         Carbon::setTestNow('2026-10-07 01:30:00');
     }
@@ -33,6 +36,8 @@ class PublicProposalAcceptanceTest extends TestCase
             'name' => 'Maria Cliente',
             'document' => '529.982.247-25',
             'email' => 'maria@example.com',
+            'signature' => 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
+            'agreed' => true,
         ], $overrides);
     }
 

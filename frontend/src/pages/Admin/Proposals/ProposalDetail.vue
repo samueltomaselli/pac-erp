@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { Check, ExternalLink, Link2, Pencil, Send, X } from '@lucide/vue'
 import AlertBanner from '@/components/AlertBanner.vue'
@@ -9,7 +9,13 @@ import BaseButton from '@/components/BaseButton.vue'
 import { formatCurrency, formatDate, formatDateTime } from '@/constants/domain'
 import { useConfirm } from '@/composables/useConfirm'
 import { errorMessage, useToast } from '@/composables/useToast'
-import { acceptProposal, getProposal, rejectProposal, sendProposal } from '@/utils/api/proposals'
+import {
+  acceptProposal,
+  getProposal,
+  getProposalSignature,
+  rejectProposal,
+  sendProposal,
+} from '@/utils/api/proposals'
 
 const route = useRoute()
 const confirm = useConfirm()
@@ -20,6 +26,7 @@ const loading = ref(true)
 const error = ref('')
 const linkCopied = ref(false)
 const transitioning = ref(null)
+const signatureUrl = ref('')
 
 const publicUrl = computed(() =>
   proposal.value?.pub_id ? `${window.location.origin}/proposta/${proposal.value.pub_id}` : null,
@@ -81,12 +88,28 @@ async function copyPublicLink() {
 async function load() {
   try {
     proposal.value = await getProposal(route.params.id)
+    loadSignature()
   } catch (e) {
     error.value = errorMessage(e, 'Não foi possível carregar a proposta.')
   } finally {
     loading.value = false
   }
 }
+
+async function loadSignature() {
+  if (!proposal.value?.acceptance?.has_signature) return
+
+  try {
+    const blob = await getProposalSignature(proposal.value.id)
+    signatureUrl.value = URL.createObjectURL(blob)
+  } catch {
+    signatureUrl.value = ''
+  }
+}
+
+onBeforeUnmount(() => {
+  if (signatureUrl.value) URL.revokeObjectURL(signatureUrl.value)
+})
 
 async function transition(item) {
   const ok = await confirm({
@@ -182,6 +205,20 @@ onMounted(load)
               <dd class="mt-0.5 tabular-nums">{{ formatDateTime(proposal.decided_at) }}</dd>
             </div>
           </dl>
+          <div v-if="proposal.acceptance" class="mt-4 border-t border-gray-100 pt-4">
+            <p class="stat-label">Aceite pelo cliente</p>
+            <p class="mt-1 text-[13px] text-gray-900">{{ proposal.acceptance.name }}</p>
+            <p class="mt-0.5 text-xs text-gray-500">
+              {{ proposal.acceptance.email }} · {{ formatDateTime(proposal.acceptance.accepted_at) }}
+            </p>
+            <p class="mt-0.5 font-mono text-[11px] text-gray-400">IP {{ proposal.acceptance.ip_address }}</p>
+            <img
+              v-if="signatureUrl"
+              :src="signatureUrl"
+              alt="Assinatura do cliente"
+              class="mt-3 h-24 w-full rounded-md border border-gray-200 bg-white object-contain"
+            />
+          </div>
           <a
             v-if="publicUrl"
             :href="publicUrl"

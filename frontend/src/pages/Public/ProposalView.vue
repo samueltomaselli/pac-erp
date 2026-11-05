@@ -1,10 +1,11 @@
 <script setup>
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import AlertBanner from '@/components/AlertBanner.vue'
 import BadgeTag from '@/components/BadgeTag.vue'
 import BaseButton from '@/components/BaseButton.vue'
 import FormField from '@/components/FormField.vue'
+import SignaturePad from '@/components/SignaturePad.vue'
 import {
   DOCUMENT_MASK,
   formatCurrency,
@@ -12,11 +13,9 @@ import {
   formatDateTime,
   maskAttr,
 } from '@/constants/domain'
-import { useConfirm } from '@/composables/useConfirm'
 import { acceptPublicProposal, getPublicProposal } from '@/utils/api/publicProposals'
 
 const route = useRoute()
-const confirm = useConfirm()
 const proposal = ref(null)
 const loading = ref(true)
 const notFound = ref(false)
@@ -24,7 +23,8 @@ const pageError = ref('')
 const formErrors = ref({})
 const formMessage = ref('')
 const submitting = ref(false)
-const form = reactive({ name: '', document: '', email: '' })
+const form = reactive({ name: '', document: '', email: '', signature: '', agreed: false })
+const canSubmit = computed(() => Boolean(form.signature) && form.agreed)
 
 async function loadProposal() {
   loading.value = true
@@ -49,16 +49,6 @@ async function onAccept() {
   formErrors.value = {}
   formMessage.value = ''
 
-  const ok = await confirm({
-    title: 'Confirmar aceite',
-    message: `Ao confirmar, ${form.name || 'você'} declara aceitar a proposta ${proposal.value.reference} nas condições apresentadas.`,
-    confirmLabel: 'Aceitar proposta',
-  })
-
-  if (!ok) {
-    return
-  }
-
   submitting.value = true
 
   try {
@@ -66,6 +56,8 @@ async function onAccept() {
       name: form.name,
       document: form.document.replace(/\D/g, ''),
       email: form.email,
+      signature: form.signature,
+      agreed: form.agreed,
     })
     await loadProposal()
   } catch (error) {
@@ -251,7 +243,7 @@ onMounted(loadProposal)
             Aceite da proposta
           </h2>
           <p class="mt-1 text-sm text-gray-500">
-            Preencha seus dados para registrar o aceite comercial.
+            Preencha seus dados e assine para registrar o aceite comercial.
           </p>
 
           <AlertBanner v-if="formMessage" class="mt-4">{{ formMessage }}</AlertBanner>
@@ -294,10 +286,26 @@ onMounted(loadProposal)
                 :class="formErrors.email && 'field-error'"
               />
             </FormField>
+            <div class="sm:col-span-2">
+              <SignaturePad v-model="form.signature" :invalid="Boolean(formErrors.signature)" />
+              <p v-if="formErrors.signature" class="mt-1 text-xs text-red-600">{{ formErrors.signature[0] }}</p>
+            </div>
+            <div class="sm:col-span-2">
+              <label class="flex items-start gap-3 text-sm text-gray-700">
+                <input
+                  id="agreed"
+                  v-model="form.agreed"
+                  type="checkbox"
+                  class="mt-0.5 size-4 shrink-0 rounded border-gray-300"
+                />
+                <span>Ao clicar em "Assinar e aceitar", concordo em ficar juridicamente vinculado por esta assinatura eletrônica.</span>
+              </label>
+              <p v-if="formErrors.agreed" class="mt-1 text-xs text-red-600">{{ formErrors.agreed[0] }}</p>
+            </div>
             <div class="flex flex-col-reverse items-stretch gap-3 border-t border-gray-200 pt-4 sm:col-span-2 sm:flex-row sm:items-center sm:justify-between">
-              <p class="text-xs text-gray-500">O aceite fica registrado com data e hora.</p>
-              <BaseButton type="submit" size="lg" :loading="submitting">
-                {{ submitting ? 'Registrando aceite…' : 'Aceitar proposta' }}
+              <p class="text-xs text-gray-500">O aceite fica registrado com data, hora e assinatura.</p>
+              <BaseButton type="submit" size="lg" :loading="submitting" :disabled="!canSubmit">
+                {{ submitting ? 'Registrando aceite…' : 'Assinar e aceitar' }}
               </BaseButton>
             </div>
           </form>

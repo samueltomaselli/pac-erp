@@ -15,6 +15,8 @@ use App\Models\Customer;
 use App\Models\Proposal;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ProposalController extends Controller
 {
@@ -44,9 +46,20 @@ class ProposalController extends Controller
 
     public function show(Proposal $proposal): ProposalResource
     {
-        $proposal->load(['customer', 'items']);
+        $proposal->load(['customer', 'items', 'acceptance']);
 
         return new ProposalResource($proposal);
+    }
+
+    public function signature(Proposal $proposal): StreamedResponse
+    {
+        $path = $proposal->acceptance?->signature_path;
+
+        abort_if($path === null || ! Storage::disk('local')->exists($path), 404);
+
+        return Storage::disk('local')->response($path, "assinatura-{$proposal->reference}.png", [
+            'Content-Type' => 'image/png',
+        ]);
     }
 
     public function update(UpdateProposalRequest $request, Proposal $proposal, UpdateProposal $updateProposal): JsonResponse|ProposalResource

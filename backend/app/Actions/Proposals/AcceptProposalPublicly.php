@@ -9,14 +9,17 @@ use App\Enums\PublicProposalStatus;
 use App\Models\Proposal;
 use App\Models\ProposalAcceptance;
 use App\Rules\CpfOrCnpj;
+use App\Rules\SignatureImage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class AcceptProposalPublicly extends Action
 {
     public function __construct(private readonly TransitionProposalStatus $transition) {}
 
     /**
-     * @param  array{name: string, document: string, email: string}  $data
+     * @param  array{name: string, document: string, email: string, signature: string}  $data
      */
     public function handle(Proposal $proposal, array $data, string $ip, ?string $userAgent): ActionResult
     {
@@ -38,11 +41,15 @@ class AcceptProposalPublicly extends Action
                 return $result;
             }
 
+            $signaturePath = "proposals/{$proposal->id}/assinatura-".Str::uuid().'.png';
+            Storage::disk('local')->put($signaturePath, (string) SignatureImage::decode($data['signature']));
+
             ProposalAcceptance::create([
                 'proposal_id' => $proposal->id,
                 'name' => $data['name'],
                 'document' => CpfOrCnpj::digits($data['document']),
                 'email' => $data['email'],
+                'signature_path' => $signaturePath,
                 'ip_address' => $ip,
                 'user_agent' => $userAgent,
                 'accepted_at' => now(),
