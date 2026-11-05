@@ -114,6 +114,12 @@ const routes = [
     meta: { role: 'customer' },
   },
   {
+    path: '/customer/chamados',
+    name: 'customer.tickets.index',
+    component: () => import('@/pages/CustomerTickets.vue'),
+    meta: { role: 'customer' },
+  },
+  {
     path: '/customer/chamados/:id',
     name: 'customer.tickets.show',
     component: () => import('@/pages/CustomerTicketDetail.vue'),

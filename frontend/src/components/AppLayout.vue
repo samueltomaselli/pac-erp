@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   CheckSquare,
@@ -26,7 +26,7 @@ const auth = useAuthStore()
 
 const sidebarOpen = ref(false)
 
-const navigation = [
+const adminNavigation = [
   {
     label: 'Operação',
     items: [
@@ -61,6 +61,18 @@ const navigation = [
     ],
   },
 ]
+
+const customerNavigation = [
+  {
+    label: 'Área do cliente',
+    items: [
+      { name: 'customer.home', label: 'Início', icon: LayoutDashboard },
+      { name: 'customer.tickets.index', label: 'Chamados', icon: Ticket, match: '/customer/chamados' },
+    ],
+  },
+]
+
+const navigation = computed(() => (auth.role === 'customer' ? customerNavigation : adminNavigation))
 
 const widthClasses = { full: '', wide: 'mx-auto max-w-6xl', narrow: 'mx-auto max-w-3xl' }
 

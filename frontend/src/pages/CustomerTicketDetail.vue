@@ -1,19 +1,15 @@
 <script setup>
 import { ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { ArrowLeft, LogOut } from '@lucide/vue'
+import { useRoute } from 'vue-router'
 import AlertBanner from '@/components/AlertBanner.vue'
 import BadgeTag from '@/components/BadgeTag.vue'
-import BaseButton from '@/components/BaseButton.vue'
+import AppLayout from '@/components/AppLayout.vue'
 import TicketConversation from '@/components/TicketConversation.vue'
 import { formatDateTime } from '@/constants/domain'
 import { errorMessage } from '@/composables/useToast'
-import { useAuthStore } from '@/stores/useAuthStore'
 import { getCustomerTicket } from '@/utils/api/customerTickets'
 
 const route = useRoute()
-const router = useRouter()
-const auth = useAuthStore()
 const ticket = ref(null)
 const loading = ref(true)
 const error = ref('')
@@ -31,38 +27,17 @@ async function loadTicket() {
   }
 }
 
-async function onLogout() {
-  await auth.logout()
-  router.push({ name: 'login' })
-}
-
 watch(() => route.params.id, loadTicket, { immediate: true })
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50">
-    <header class="sticky top-0 z-30 flex h-16 items-center gap-x-3 border-b border-gray-200 bg-white px-4 lg:px-6">
-      <div class="flex size-7 shrink-0 items-center justify-center rounded-md bg-theme-light-500 text-[13px] font-semibold text-white">
-        R
-      </div>
-      <span class="font-display text-[15px] font-semibold text-gray-900">Área do cliente</span>
-      <div class="ml-auto flex items-center gap-x-2">
-        <span class="hidden max-w-50 truncate text-xs text-gray-500 sm:block">{{ auth.user?.email }}</span>
-        <button
-          type="button"
-          class="inline-flex size-9 items-center justify-center rounded-md text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
-          aria-label="Sair"
-          @click="onLogout"
-        >
-          <LogOut class="size-4" />
-        </button>
-      </div>
-    </header>
-    <main class="mx-auto max-w-4xl space-y-4 px-4 py-6 lg:px-6">
-      <BaseButton variant="ghost" class="!shadow-none" :to="{ name: 'customer.home' }">
-        <ArrowLeft class="size-4" />
-        Meus chamados
-      </BaseButton>
+  <AppLayout
+    :title="ticket ? ticket.reference : 'Chamado'"
+    :subtitle="ticket?.title ?? ''"
+    :back="{ name: 'customer.tickets.index' }"
+    width="wide"
+  >
+    <div class="space-y-4">
       <div v-if="loading" class="panel space-y-4 p-6">
         <div class="h-5 w-56 animate-pulse rounded bg-gray-200" />
         <div class="h-24 animate-pulse rounded bg-gray-100" />
@@ -104,6 +79,6 @@ watch(() => route.params.id, loadTicket, { immediate: true })
         </AlertBanner>
         <TicketConversation :ticket="ticket" customer-mode @updated="loadTicket" />
       </div>
-    </main>
-  </div>
+    </div>
+  </AppLayout>
 </template>
