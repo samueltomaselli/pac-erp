@@ -66,7 +66,7 @@ async function onSubmit() {
       >
         {{ error }}
       </p>
-      <BaseButton type="submit" :disabled="submitting" block>Cadastrar</BaseButton>
+      <BaseButton type="submit" size="lg" :loading="submitting" block>Cadastrar</BaseButton>
     </form>
     <template #footer>
       Já tem uma conta?

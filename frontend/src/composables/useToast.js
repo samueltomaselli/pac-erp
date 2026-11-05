@@ -1,17 +1,26 @@
 import { reactive } from 'vue'
 
 export const toasts = reactive([])
+
 let nextId = 1
 
 export function dismissToast(id) {
   const index = toasts.findIndex((toast) => toast.id === id)
-  if (index !== -1) toasts.splice(index, 1)
+
+  if (index !== -1) {
+    toasts.splice(index, 1)
+  }
 }
 
 function push(tone, message, duration = 3500) {
   const id = nextId++
+
   toasts.push({ id, tone, message })
-  if (toasts.length > 4) toasts.shift()
+
+  if (toasts.length > 4) {
+    toasts.shift()
+  }
+
   setTimeout(() => dismissToast(id), duration)
 }
 

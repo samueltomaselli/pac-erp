@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
 import { useRoute } from 'vue-router'
+import AlertBanner from '@/components/AlertBanner.vue'
 import BadgeTag from '@/components/BadgeTag.vue'
 import BaseButton from '@/components/BaseButton.vue'
 import FormField from '@/components/FormField.vue'
@@ -11,9 +12,11 @@ import {
   formatDateTime,
   maskAttr,
 } from '@/constants/domain'
+import { useConfirm } from '@/composables/useConfirm'
 import { acceptPublicProposal, getPublicProposal } from '@/utils/api/publicProposals'
 
 const route = useRoute()
+const confirm = useConfirm()
 const proposal = ref(null)
 const loading = ref(true)
 const notFound = ref(false)
@@ -46,7 +49,13 @@ async function onAccept() {
   formErrors.value = {}
   formMessage.value = ''
 
-  if (!window.confirm('Confirmar o aceite desta proposta comercial?')) {
+  const ok = await confirm({
+    title: 'Confirmar aceite',
+    message: `Ao confirmar, ${form.name || 'você'} declara aceitar a proposta ${proposal.value.reference} nas condições apresentadas.`,
+    confirmLabel: 'Aceitar proposta',
+  })
+
+  if (!ok) {
     return
   }
 
@@ -114,12 +123,7 @@ onMounted(loadProposal)
           Confira o link recebido ou fale com o escritório.
         </p>
       </section>
-      <p
-        v-else-if="pageError"
-        class="rounded-lg bg-red-100 px-4 py-3 text-sm text-red-600 ring-1 ring-red-200"
-      >
-        {{ pageError }}
-      </p>
+      <AlertBanner v-else-if="pageError">{{ pageError }}</AlertBanner>
 
       <template v-else-if="proposal">
         <section class="panel mb-4 p-5 sm:p-6">
@@ -150,22 +154,22 @@ onMounted(loadProposal)
             <table class="min-w-full text-sm">
               <thead class="bg-gray-50 text-left">
                 <tr>
-                  <th class="px-4 py-3 text-xs font-medium text-gray-500">Item</th>
-                  <th class="whitespace-nowrap px-4 py-3 text-xs font-medium text-gray-500">Tipo</th>
-                  <th class="whitespace-nowrap px-4 py-3 text-xs font-medium text-gray-500">Qtd.</th>
-                  <th class="whitespace-nowrap px-4 py-3 text-xs font-medium text-gray-500">Valor</th>
-                  <th class="whitespace-nowrap px-4 py-3 text-xs font-medium text-gray-500">Total</th>
+                  <th class="th">Item</th>
+                  <th class="th">Tipo</th>
+                  <th class="th text-right">Qtd.</th>
+                  <th class="th text-right">Valor</th>
+                  <th class="th text-right">Total</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-200">
                 <tr v-for="(item, index) in proposal.items" :key="index">
                   <td class="px-4 py-3">{{ item.description }}</td>
                   <td class="whitespace-nowrap px-4 py-3">{{ item.type_label }}</td>
-                  <td class="px-4 py-3 tabular-nums">{{ item.quantity }}</td>
-                  <td class="whitespace-nowrap px-4 py-3 tabular-nums">
+                  <td class="td text-right tabular-nums">{{ item.quantity }}</td>
+                  <td class="td whitespace-nowrap text-right tabular-nums">
                     {{ formatCurrency(item.unit_amount_cents) }}
                   </td>
-                  <td class="whitespace-nowrap px-4 py-3 tabular-nums">
+                  <td class="td whitespace-nowrap text-right font-medium tabular-nums">
                     {{ formatCurrency(item.line_total_cents) }}
                     <span v-if="item.installments > 1" class="block text-xs text-gray-500">
                       {{ item.installments }}x de
@@ -228,13 +232,13 @@ onMounted(loadProposal)
           </div>
         </section>
 
-        <section v-if="proposal.status === 'accepted'" class="panel p-5">
-          <h2 class="text-sm font-semibold text-gray-900">Aceite registrado</h2>
-          <p class="mt-2 text-sm text-gray-600">
+        <AlertBanner v-if="proposal.status === 'accepted'" tone="success">
+          <p class="font-semibold">Aceite registrado</p>
+          <p class="mt-0.5">
             Aceita por {{ proposal.acceptance.name }} em
             {{ formatDateTime(proposal.acceptance.accepted_at) }}.
           </p>
-        </section>
+        </AlertBanner>
         <section
           v-else-if="proposal.status === 'expired'"
           class="rounded-lg bg-amber-50 p-5 text-sm text-amber-900 ring-1 ring-amber-200"
@@ -250,15 +254,10 @@ onMounted(loadProposal)
             Preencha seus dados para registrar o aceite comercial.
           </p>
 
-          <p
-            v-if="formMessage"
-            class="mt-4 rounded-lg bg-red-100 px-4 py-3 text-sm text-red-600 ring-1 ring-red-200"
-          >
-            {{ formMessage }}
-          </p>
+          <AlertBanner v-if="formMessage" class="mt-4">{{ formMessage }}</AlertBanner>
 
-          <form class="mt-5 space-y-4" @submit.prevent="onAccept">
-            <FormField label="Nome / Razão social" name="name" :errors="formErrors">
+          <form class="mt-5 grid gap-4 sm:grid-cols-2" @submit.prevent="onAccept">
+            <FormField class="sm:col-span-2" label="Nome / Razão social" name="name" :errors="formErrors" required>
               <input
                 id="name"
                 v-model="form.name"
@@ -269,7 +268,7 @@ onMounted(loadProposal)
                 :class="formErrors.name && 'field-error'"
               />
             </FormField>
-            <FormField label="CNPJ/CPF" name="document" :errors="formErrors">
+            <FormField label="CNPJ/CPF" name="document" :errors="formErrors" required>
               <input
                 id="document"
                 v-model="form.document"
@@ -284,7 +283,7 @@ onMounted(loadProposal)
                 :class="formErrors.document && 'field-error'"
               />
             </FormField>
-            <FormField label="E-mail" name="email" :errors="formErrors">
+            <FormField label="E-mail" name="email" :errors="formErrors" required>
               <input
                 id="email"
                 v-model="form.email"
@@ -295,8 +294,9 @@ onMounted(loadProposal)
                 :class="formErrors.email && 'field-error'"
               />
             </FormField>
-            <div class="flex justify-end border-t border-gray-200 pt-4">
-              <BaseButton type="submit" :disabled="submitting">
+            <div class="flex flex-col-reverse items-stretch gap-3 border-t border-gray-200 pt-4 sm:col-span-2 sm:flex-row sm:items-center sm:justify-between">
+              <p class="text-xs text-gray-500">O aceite fica registrado com data e hora.</p>
+              <BaseButton type="submit" size="lg" :loading="submitting">
                 {{ submitting ? 'Registrando aceite…' : 'Aceitar proposta' }}
               </BaseButton>
             </div>

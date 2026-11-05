@@ -1,147 +1,195 @@
 <script setup>
-import { computed, onMounted, reactive, ref } from "vue";
-import { ArrowLeft, Plus, Trash2 } from "@lucide/vue";
-import AppLayout from "@/components/AppLayout.vue";
-import BaseButton from "@/components/BaseButton.vue";
-import { PROPOSAL_TEMPLATE_TYPES } from "@/constants/domain";
+import { computed, onMounted, reactive, ref } from 'vue'
+import { Pencil, Plus, Trash2 } from '@lucide/vue'
+import AlertBanner from '@/components/AlertBanner.vue'
+import AppLayout from '@/components/AppLayout.vue'
+import BaseButton from '@/components/BaseButton.vue'
+import BaseDrawer from '@/components/BaseDrawer.vue'
+import FormField from '@/components/FormField.vue'
+import { PROPOSAL_TEMPLATE_TYPES } from '@/constants/domain'
+import { useConfirm } from '@/composables/useConfirm'
+import { errorMessage, useToast } from '@/composables/useToast'
 import {
   createProposalTemplate,
   deleteProposalTemplate,
   listProposalTemplates,
   updateProposalTemplate,
-} from "@/utils/api/proposalTemplates";
-const templates = ref([]);
-const error = ref("");
-const editing = ref(null);
-const form = reactive({ name: "", type: "observations", content: "" });
+} from '@/utils/api/proposalTemplates'
+
+const confirm = useConfirm()
+const toast = useToast()
+
+const templates = ref([])
+const loading = ref(true)
+const error = ref('')
+const drawerOpen = ref(false)
+const editing = ref(null)
+const saving = ref(false)
+const formErrors = ref({})
+const formMessage = ref('')
+const form = reactive({ name: '', type: 'observations', content: '' })
+
 const groups = computed(() =>
   PROPOSAL_TEMPLATE_TYPES.map((type) => ({
     ...type,
     items: templates.value.filter((item) => item.type === type.value),
   })),
-);
-function reset(item = null) {
-  editing.value = item?.id || null;
+)
+
+function open(item = null, type = 'observations') {
+  editing.value = item?.id || null
+  formErrors.value = {}
+  formMessage.value = ''
   Object.assign(
     form,
-    item
-      ? { name: item.name, type: item.type, content: item.content }
-      : { name: "", type: "observations", content: "" },
-  );
+    item ? { name: item.name, type: item.type, content: item.content } : { name: '', type, content: '' },
+  )
+  drawerOpen.value = true
 }
+
 async function load() {
+  loading.value = true
+
   try {
-    const result = await listProposalTemplates({ per_page: 100 });
-    templates.value = result.data || result;
-  } catch {
-    error.value = "Não foi possível carregar os modelos.";
-  }
-}
-async function save() {
-  try {
-    if (editing.value) await updateProposalTemplate(editing.value, form);
-    else await createProposalTemplate(form);
-    reset();
-    load();
+    const result = await listProposalTemplates({ per_page: 100 })
+    templates.value = result.data || result
   } catch (e) {
-    error.value =
-      e?.response?.data?.message || "Não foi possível salvar o modelo.";
+    error.value = errorMessage(e, 'Não foi possível carregar os modelos.')
+  } finally {
+    loading.value = false
   }
 }
-async function remove(item) {
-  if (!window.confirm(`Remover o modelo "${item.name}"?`)) return;
-  await deleteProposalTemplate(item.id);
-  load();
+
+async function save() {
+  saving.value = true
+  formErrors.value = {}
+  formMessage.value = ''
+
+  try {
+    if (editing.value) await updateProposalTemplate(editing.value, form)
+    else await createProposalTemplate(form)
+
+    toast.success(editing.value ? 'Modelo atualizado.' : 'Modelo criado.')
+    drawerOpen.value = false
+    load()
+  } catch (e) {
+    formErrors.value = e?.response?.data?.errors || {}
+    formMessage.value = errorMessage(e, 'Não foi possível salvar o modelo.')
+  } finally {
+    saving.value = false
+  }
 }
-onMounted(load);
+
+async function remove(item) {
+  const ok = await confirm({
+    title: 'Remover modelo',
+    message: `"${item.name}" será removido. Textos já copiados para propostas não são afetados.`,
+    confirmLabel: 'Remover',
+    tone: 'danger',
+  })
+
+  if (!ok) return
+
+  try {
+    await deleteProposalTemplate(item.id)
+    toast.success('Modelo removido.')
+    load()
+  } catch (e) {
+    toast.error(errorMessage(e, 'Não foi possível remover o modelo.'))
+  }
+}
+
+onMounted(load)
 </script>
 <template>
-  <AppLayout
-    title="Modelos de texto"
-    subtitle="Textos reutilizáveis para propostas"
-    ><template #actions
-      ><router-link :to="{ name: 'admin.proposals.index' }"
-        ><BaseButton type="button" variant="secondary"
-          ><ArrowLeft class="size-3.5" /> Propostas</BaseButton
-        ></router-link
-      ></template
-    >
-    <p v-if="error" class="mb-4 rounded-lg bg-red-100 px-4 py-3 text-red-600">
-      {{ error }}
-    </p>
-    <form class="panel mb-5 p-5" @submit.prevent="save">
-      <div class="grid gap-4 sm:grid-cols-2">
-        <div>
-          <label class="field-label">Nome</label
-          ><input v-model="form.name" required class="field" />
+  <AppLayout title="Modelos de texto" subtitle="Textos reutilizáveis para observações e condições gerais">
+    <template #actions>
+      <BaseButton @click="open()">
+        <Plus class="size-4" />
+        <span class="hidden sm:inline">Novo modelo</span>
+        <span class="sm:hidden">Novo</span>
+      </BaseButton>
+    </template>
+
+    <AlertBanner v-if="error" class="mb-4">{{ error }}</AlertBanner>
+
+    <div v-if="loading" class="grid gap-4 lg:grid-cols-2">
+      <div v-for="n in 2" :key="n" class="panel h-56 animate-pulse bg-gray-100" />
+    </div>
+
+    <div v-else class="grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
+      <section v-for="group in groups" :key="group.value" class="panel overflow-hidden">
+        <div class="flex items-center justify-between gap-3 border-b border-gray-200 px-5 py-3">
+          <h2 class="text-sm font-semibold text-gray-900">
+            {{ group.label }}
+            <span class="ml-1 text-xs font-normal tabular-nums text-gray-500">{{ group.items.length }}</span>
+          </h2>
+          <BaseButton variant="ghost" size="sm" @click="open(null, group.value)">
+            <Plus class="size-3.5" /> Adicionar
+          </BaseButton>
         </div>
-        <div>
-          <label class="field-label">Tipo</label
-          ><select v-model="form.type" class="field">
-            <option
-              v-for="type in PROPOSAL_TEMPLATE_TYPES"
-              :key="type.value"
-              :value="type.value"
-            >
-              {{ type.label }}
-            </option>
-          </select>
-        </div>
-        <div class="sm:col-span-2">
-          <label class="field-label">Conteúdo</label
-          ><textarea v-model="form.content" rows="7" required class="field" />
-        </div>
-      </div>
-      <div class="mt-4 flex justify-end gap-2">
-        <BaseButton
-          v-if="editing"
-          type="button"
-          variant="secondary"
-          @click="reset()"
-          >Cancelar</BaseButton
-        ><BaseButton type="submit"
-          ><Plus v-if="!editing" class="size-3.5" />
-          {{ editing ? "Salvar alterações" : "Novo modelo" }}</BaseButton
-        >
-      </div>
-    </form>
-    <section v-for="group in groups" :key="group.value" class="mb-5">
-      <h2 class="mb-2 font-display text-base font-semibold">
-        {{ group.label }}
-      </h2>
-      <div class="space-y-2">
-        <article
-          v-for="item in group.items"
-          :key="item.id"
-          class="panel flex items-start justify-between gap-4 p-4"
-        >
-          <div>
-            <h3 class="font-medium">{{ item.name }}</h3>
-            <p class="mt-2 whitespace-pre-wrap text-sm text-gray-600">
-              {{ item.content }}
-            </p>
-          </div>
-          <div class="flex shrink-0 gap-1">
-            <BaseButton
-              type="button"
-              variant="ghost"
-              size="sm"
-              @click="reset(item)"
-              >Editar</BaseButton
-            ><BaseButton
-              type="button"
-              variant="ghost"
-              size="sm"
-              class="text-red-600"
-              @click="remove(item)"
-              ><Trash2 class="size-3.5"
-            /></BaseButton>
-          </div>
-        </article>
-        <p v-if="!group.items.length" class="text-sm text-gray-500">
+        <p v-if="!group.items.length" class="px-5 py-10 text-center text-sm text-gray-500">
           Nenhum modelo cadastrado.
         </p>
-      </div>
-    </section></AppLayout
-  >
+        <ul v-else class="divide-y divide-gray-100">
+          <li v-for="item in group.items" :key="item.id" class="group flex items-start gap-3 px-5 py-4 hover:bg-gray-50">
+            <button type="button" class="min-w-0 flex-1 text-left" @click="open(item)">
+              <h3 class="text-sm font-medium text-gray-900 group-hover:text-theme-light-700">{{ item.name }}</h3>
+              <p class="mt-1 line-clamp-3 whitespace-pre-wrap text-[13px] leading-relaxed text-gray-600">
+                {{ item.content }}
+              </p>
+            </button>
+            <div class="flex shrink-0 gap-0.5">
+              <BaseButton variant="ghost" size="sm" icon label="Editar" @click="open(item)">
+                <Pencil class="size-4" />
+              </BaseButton>
+              <BaseButton variant="ghost-danger" size="sm" icon label="Remover" @click="remove(item)">
+                <Trash2 class="size-4" />
+              </BaseButton>
+            </div>
+          </li>
+        </ul>
+      </section>
+    </div>
+
+    <BaseDrawer
+      :open="drawerOpen"
+      :title="editing ? 'Editar modelo' : 'Novo modelo'"
+      description="O texto é copiado para a proposta ao ser inserido"
+      size="lg"
+      @close="drawerOpen = false"
+    >
+      <form id="template-form" class="space-y-4" @submit.prevent="save">
+        <AlertBanner v-if="formMessage">{{ formMessage }}</AlertBanner>
+        <div class="grid gap-4 sm:grid-cols-2">
+          <FormField label="Nome" name="name" :errors="formErrors" required>
+            <input id="name" v-model="form.name" required class="field" :class="formErrors.name && 'field-error'" />
+          </FormField>
+          <FormField label="Tipo" name="type" :errors="formErrors">
+            <select id="type" v-model="form.type" class="field">
+              <option v-for="type in PROPOSAL_TEMPLATE_TYPES" :key="type.value" :value="type.value">
+                {{ type.label }}
+              </option>
+            </select>
+          </FormField>
+        </div>
+        <FormField label="Conteúdo" name="content" :errors="formErrors" required>
+          <textarea
+            id="content"
+            v-model="form.content"
+            rows="16"
+            required
+            class="field leading-relaxed"
+            :class="formErrors.content && 'field-error'"
+          />
+        </FormField>
+      </form>
+      <template #footer>
+        <BaseButton variant="secondary" @click="drawerOpen = false">Cancelar</BaseButton>
+        <BaseButton type="submit" form="template-form" :loading="saving">
+          {{ editing ? 'Salvar alterações' : 'Criar modelo' }}
+        </BaseButton>
+      </template>
+    </BaseDrawer>
+  </AppLayout>
 </template>
