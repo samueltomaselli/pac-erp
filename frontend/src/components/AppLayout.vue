@@ -64,7 +64,7 @@ const adminNavigation = [
 
 const customerNavigation = [
   {
-    label: 'Área do cliente',
+    label: 'Menu',
     items: [
       { name: 'customer.home', label: 'Início', icon: LayoutDashboard },
       { name: 'customer.tickets.index', label: 'Chamados', icon: Ticket, match: '/customer/chamados' },
@@ -83,7 +83,13 @@ async function onLogout() {
 </script>
 <template>
   <div class="flex min-h-screen bg-gray-50">
-    <AppSidebar v-model:open="sidebarOpen" :navigation="navigation" :email="auth.user?.email" @logout="onLogout" />
+    <AppSidebar
+      v-model:open="sidebarOpen"
+      :navigation="navigation"
+      :area="auth.role === 'customer' ? 'customer' : 'admin'"
+      :email="auth.user?.email"
+      @logout="onLogout"
+    />
     <div class="flex min-w-0 flex-1 flex-col">
       <AppHeader :title="title" :subtitle="subtitle" :back="back" @toggle="sidebarOpen = !sidebarOpen">
         <template #actions>

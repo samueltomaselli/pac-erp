@@ -7,11 +7,19 @@ const props = defineProps({
   navigation: { type: Array, required: true },
   open: { type: Boolean, default: false },
   email: { type: String, default: '' },
+  area: { type: String, default: 'admin', validator: (v) => ['admin', 'customer'].includes(v) },
 })
 
 const emit = defineEmits(['update:open', 'logout'])
 
 const route = useRoute()
+
+const AREAS = {
+  admin: { label: 'Equipe', badge: 'bg-theme-light-500/10 text-theme-light-800 ring-theme-light-500/20' },
+  customer: { label: 'Área do cliente', badge: 'bg-amber-50 text-amber-800 ring-amber-600/20' },
+}
+
+const areaInfo = computed(() => AREAS[props.area])
 
 const STORAGE_KEY = 'erp.sidebar.expanded'
 
@@ -76,9 +84,15 @@ watch(
       >
         R
       </div>
-      <span v-if="expanded" class="min-w-0 flex-1 truncate font-display text-base font-semibold text-gray-900">
-        Rauzee
-      </span>
+      <div v-if="expanded" class="min-w-0 flex-1 leading-tight">
+        <span class="block truncate font-display text-base font-semibold text-gray-900">Rauzee</span>
+        <span
+          class="mt-0.5 inline-flex rounded px-1.5 py-px text-[10px] font-semibold uppercase tracking-wide ring-1 ring-inset"
+          :class="areaInfo.badge"
+        >
+          {{ areaInfo.label }}
+        </span>
+      </div>
       <button
         v-if="expanded"
         type="button"
@@ -147,8 +161,9 @@ watch(
         >
           {{ email?.slice(0, 1) || '?' }}
         </div>
-        <span v-if="expanded" class="min-w-0 flex-1 truncate text-xs text-gray-600" :title="email">
-          {{ email }}
+        <span v-if="expanded" class="min-w-0 flex-1 leading-tight" :title="email">
+          <span class="block truncate text-xs text-gray-700">{{ email }}</span>
+          <span class="block text-[11px] text-gray-400">{{ area === 'customer' ? 'Cliente' : 'Administrador' }}</span>
         </span>
         <button
           type="button"
