@@ -10,7 +10,7 @@ RUN npm run build
 FROM composer:2 AS vendor
 WORKDIR /app
 COPY backend/composer.json backend/composer.lock ./
-RUN composer install --no-dev --no-interaction --no-scripts --no-autoloader --prefer-dist --ignore-platform-reqs
+RUN composer install --no-interaction --no-scripts --no-autoloader --prefer-dist --ignore-platform-reqs
 
 FROM php:8.4-apache
 RUN apt-get update \
@@ -27,7 +27,7 @@ RUN sed -ri 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-avail
 WORKDIR /var/www/html
 COPY backend/ ./
 COPY --from=vendor /app/vendor ./vendor
-RUN composer dump-autoload --optimize --no-dev \
+RUN composer dump-autoload --optimize \
     && mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views storage/logs storage/app/private \
     && chown -R www-data:www-data storage bootstrap/cache
 COPY --from=frontend /app/dist/ ./public/
