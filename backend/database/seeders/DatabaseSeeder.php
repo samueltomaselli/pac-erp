@@ -3,7 +3,10 @@
 namespace Database\Seeders;
 
 use App\Enums\CustomerSegment;
+use App\Enums\PaymentMethod;
+use App\Enums\ProposalItemType;
 use App\Enums\ProposalStatus;
+use App\Enums\ProposalTemplateType;
 use App\Enums\TaskPriority;
 use App\Enums\TicketCategory;
 use App\Enums\TicketPriority;
@@ -11,7 +14,9 @@ use App\Enums\TicketStatus;
 use App\Enums\UserRole;
 use App\Models\Customer;
 use App\Models\Proposal;
+use App\Models\ProposalCatalogItem;
 use App\Models\ProposalItem;
+use App\Models\ProposalTemplate;
 use App\Models\Task;
 use App\Models\Ticket;
 use App\Models\TicketComment;
@@ -35,6 +40,8 @@ class DatabaseSeeder extends Seeder
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
+
+        $this->catalog();
 
         $alvorada = $this->customer('Imobiliária Alvorada', '11222333000181', 'contato@alvorada.test', CustomerSegment::RealEstate, 'Marina Alves');
         $prata = $this->customer('Corban Prata', '11444777000161', 'financeiro@prata.test', CustomerSegment::Corban, 'Rafael Prata');
@@ -104,6 +111,40 @@ class DatabaseSeeder extends Seeder
             'O telefone do financeiro mudou para (11) 3333-4444.');
     }
 
+    private function catalog(): void
+    {
+        $items = [
+            ['Acompanhamento mensal', 'Gestão da carteira e suporte à equipe', ProposalItemType::Recurring, 50000, false],
+            ['Usuário adicional', 'Acesso para mais uma pessoa da equipe', ProposalItemType::Recurring, 8900, false],
+            ['Implantação inicial', 'Configuração da conta e importação de dados', ProposalItemType::OneTime, 100000, true],
+            ['Treinamento da equipe', 'Turma de até 10 pessoas, on-line', ProposalItemType::OneTime, 45000, true],
+        ];
+
+        foreach ($items as $order => [$name, $description, $type, $cents, $installments]) {
+            ProposalCatalogItem::create([
+                'name' => $name,
+                'description' => $description,
+                'type' => $type,
+                'default_quantity' => 1,
+                'default_unit_amount_cents' => $cents,
+                'allows_installments' => $installments,
+                'is_active' => true,
+                'sort_order' => $order,
+            ]);
+        }
+
+        ProposalTemplate::create([
+            'name' => 'Escopo padrão',
+            'type' => ProposalTemplateType::Observations,
+            'content' => 'Inclui configuração da conta, importação da carteira atual e treinamento de até 5 pessoas da equipe.',
+        ]);
+        ProposalTemplate::create([
+            'name' => 'Contrato anual',
+            'type' => ProposalTemplateType::GeneralConditions,
+            'content' => 'Vigência mínima de 12 meses. Reajuste anual pelo IPCA. Cancelamento com aviso de 30 dias.',
+        ]);
+    }
+
     private function customer(string $name, string $document, string $email, CustomerSegment $segment, string $contact): Customer
     {
         $user = User::factory()->create([
@@ -130,6 +171,10 @@ class DatabaseSeeder extends Seeder
             'title' => $title,
             'issued_on' => today(),
             'valid_until' => today()->addDays(30),
+            'payment_method' => PaymentMethod::Boleto,
+            'payment_notes' => 'Mensalidade todo dia 10; implantação em 3 boletos.',
+            'observations' => 'Inclui configuração da conta, importação da carteira atual e treinamento de até 5 pessoas da equipe.',
+            'terms' => 'Vigência mínima de 12 meses. Reajuste anual pelo IPCA. Cancelamento com aviso de 30 dias.',
         ])->when($status === ProposalStatus::Sent, fn ($factory) => $factory->sent())
             ->when($status === ProposalStatus::Accepted, fn ($factory) => $factory->accepted())
             ->when($status === ProposalStatus::Rejected, fn ($factory) => $factory->rejected())

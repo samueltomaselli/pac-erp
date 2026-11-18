@@ -1,0 +1,9 @@
+backend/vendor
+backend/.env
+backend/database/*.sqlite
+backend/storage/logs/*
+backend/storage/framework/*/*
+frontend/node_modules
+frontend/dist
+frontend/.env*
+.git

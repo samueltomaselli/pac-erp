@@ -25,8 +25,8 @@ Route::post('/login', [AuthenticatedSessionController::class, 'store']);
 // Link público da proposta: sem autenticação, resolvido só pelo pub_id (UUID).
 // Não há rota de recusa pública: recusa é ação de admin.
 Route::middleware('throttle:60,1')->prefix('public')->group(function () {
-    Route::get('proposals/{proposal:pub_id}', [PublicProposalController::class, 'show'])->name('public.proposals.show');
-    Route::post('proposals/{proposal:pub_id}/accept', [PublicProposalController::class, 'accept'])->name('public.proposals.accept');
+    Route::get('proposals/{proposal:pub_id}', [PublicProposalController::class, 'show'])->whereUuid('proposal')->name('public.proposals.show');
+    Route::post('proposals/{proposal:pub_id}/accept', [PublicProposalController::class, 'accept'])->whereUuid('proposal')->name('public.proposals.accept');
 });
 
 Route::middleware('auth:sanctum')->group(function () {
